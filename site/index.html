@@ -45,6 +45,8 @@
   </symbol>
 </svg>
 
+<!-- the fold: masthead + map fill the first screen at any size (Steve, 2026-10-11: "this is way to tiny … fit to screen size"); the list follows on scroll -->
+<div class="fold">
 <header class="masthead">
   <div class="masthead-text">
     <p class="eyebrow">Local events, one city at a time</p>
@@ -67,11 +69,13 @@
   </div>
 </header>
 
+<figure class="map">
+  <svg id="usMap" role="img" aria-labelledby="mapTitle" preserveAspectRatio="xMidYMid meet"><title id="mapTitle">The covered cities on a map of the United States</title></svg>
+  <figcaption><span class="key"><i class="sw live"></i> live</span> <span class="key"><i class="sw soon"></i> coming soon</span> <span id="count" class="count"></span></figcaption>
+</figure>
+</div>
+
 <main>
-  <figure class="map">
-    <svg id="usMap" role="img" aria-labelledby="mapTitle" preserveAspectRatio="xMidYMid meet"><title id="mapTitle">The covered cities on a map of the United States</title></svg>
-    <figcaption><span class="key"><i class="sw live"></i> live</span> <span class="key"><i class="sw soon"></i> coming soon</span> <span id="count" class="count"></span></figcaption>
-  </figure>
   <section class="cities" aria-labelledby="citiesH">
     <h2 id="citiesH">The cities</h2>
     <ul id="cityList" class="city-list"><li>Loading…</li></ul>

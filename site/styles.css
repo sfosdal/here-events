@@ -7,7 +7,7 @@
   --display: "Big Shoulders", "Arial Narrow", "Helvetica Neue", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-  --pagew: 62rem;
+  --pagew: 128rem; /* was 62rem: the map now fills the screen (2026-10-11) */
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -36,7 +36,7 @@ body {
 a { color: inherit; }
 
 /* ---- masthead ---- */
-.masthead { width: min(var(--pagew), 100% - 2rem); margin: 2.2rem auto 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.masthead { width: min(var(--pagew), 100% - 3rem); margin: 1.6rem auto 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
 .eyebrow { margin: 0; font-family: var(--mono); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
 h1 { margin: .1rem 0 0; font-family: var(--display); font-weight: 700; font-size: clamp(2.8rem, 8vw, 4.6rem); line-height: .95; letter-spacing: -.01em; text-transform: uppercase; color: var(--ink-bright); }
 h1 .dot { color: var(--gold); }
@@ -53,10 +53,13 @@ h1 .dot { color: var(--gold); }
 .theme-toggle[data-active="dark"] .theme-knob { left: calc(.2rem + 2rem); }
 .theme-toggle[data-active="system"] .theme-knob { left: calc(.2rem + 4rem); }
 
-/* ---- the map ---- */
-main { width: min(var(--pagew), 100% - 2rem); margin: 0 auto; flex: 1; }
-.map { margin: 1.6rem 0 0; }
-#usMap { display: block; width: 100%; height: auto; aspect-ratio: 960 / 600; }
+/* ---- the fold: masthead + map fill the first screen, whatever its size (Steve, 2026-10-11: "this is way to tiny …
+   fit to screen size" — the page had been capped at 62rem, a small map on a big display). The map takes every row the
+   masthead leaves; the svg letterboxes (preserveAspectRatio meet), so a wide screen centres it. The list follows on scroll. ---- */
+.fold { height: 100svh; min-height: 34rem; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.map { width: min(var(--pagew), 100% - 3rem); margin: .8rem auto 0; padding-bottom: .8rem; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
+#usMap { display: block; width: 100%; height: 100%; min-height: 0; }
+main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .inset-line { fill: none; stroke: var(--land-edge); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; opacity: .7; }
 .pin { cursor: pointer; text-decoration: none; }
@@ -93,7 +96,7 @@ figcaption { display: flex; gap: 1.2rem; align-items: center; justify-content: c
 footer { background: var(--ink); color: var(--sky); }
 :root[data-theme="dark"] footer, :root:not([data-theme="light"]) footer { background: #0e1318; color: var(--ink); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) footer { background: var(--ink); color: var(--sky); } }
-.foot-inner { width: min(var(--pagew), 100% - 2rem); margin: 0 auto; padding: .7rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; white-space: nowrap; }
+.foot-inner { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; padding: .7rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; white-space: nowrap; }
 .gw { display: flex; align-items: center; gap: .7rem; text-decoration: none; }
 .gw-logo { width: 32px; height: 32px; color: #fff; flex: none; }
 .gw-credit { margin: 0; font-family: var(--mono); font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
@@ -101,6 +104,9 @@ footer { background: var(--ink); color: var(--sky); }
 
 /* ---- narrow screens: the map keeps its dots, drops the always-on names (the list below carries them) ---- */
 @media (max-width: 700px) {
+  .fold { display: block; height: auto; min-height: 0; } /* a portrait phone: the map is as wide as the screen and as tall as that makes it */
+  .map { margin-top: 1.2rem; display: block; }
+  #usMap { height: auto; aspect-ratio: 960 / 600; }
   .masthead { flex-direction: column; margin-top: 1.4rem; }
   .masthead-tools { order: -1; align-self: flex-end; }
   .pin .label, .pin .leader { display: none; }
@@ -118,5 +124,7 @@ footer { background: var(--ink); color: var(--sky); }
 :root[data-share] .masthead h1 { font-size: 72px; line-height: .9; }
 :root[data-share] .masthead .sub { max-width: 300px; font-size: 16px; }
 :root[data-share] .theme-toggle, :root[data-share] figcaption, :root[data-share] .cities, :root[data-share] footer { display: none !important; }
-:root[data-share] .map { margin: 0; padding: 0 24px 0 0; }
+:root[data-share] .fold { display: contents; } /* the masthead and the map are the card's two columns */
+:root[data-share] .map { margin: 0; padding: 0 24px 0 0; display: block; width: auto; }
+:root[data-share] #usMap { height: auto; aspect-ratio: 960 / 600; }
 :root[data-share] .pin .label, :root[data-share] .pin .leader { display: initial; }
