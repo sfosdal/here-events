@@ -1,7 +1,10 @@
-// here.events — the covered-cities map. Draws the US outline from
-// us-outline.json, places one dot per city from cities.json with the same
-// Albers-USA projection scripts/build-map.mjs used (the numbers must match),
-// and lists the cities below the map. No libraries.
+// here.events — the covered-cities map. Draws the US outline and the state
+// boundaries from us-outline.json, places one dot per city from cities.json
+// with the same Albers-USA projection scripts/build-map.mjs used (the numbers
+// must match), lists the cities below the map, and lets the reader zoom and
+// pan (wheel, pinch, drag, the + − buttons, double-click, the keyboard) —
+// Steve, 2026-10-12: "the base maps … should support zooming and boundaries".
+// No libraries.
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
@@ -51,7 +54,91 @@
     if (parent) parent.appendChild(e);
     return e;
   }
-  function site(c) { return c.url || 'https://' + c.key + '.here.events/'; } // a neighbourhood sits under its city (lqa.seattle.here.events, 2026-10-11)
+  function site(c) { return c.url || 'https://' + c.key + '.here.events/'; }
+
+  // ---- zoom + pan: the viewBox is the camera. Scale 1 (the whole country) to MAXK; the view never leaves the
+  // country's frame. Dots and names keep their screen size (styles.css divides by --k); borders and leaders use
+  // non-scaling strokes. One finger on a phone scrolls the page until the map is zoomed in, then it pans the map. ----
+  var MAXK = 8;
+  function zoomable(svg, W, H, onZoom) {
+    var view = { x: 0, y: 0, w: W, h: H }, kNow = 1;
+    var zin = $('zoomIn'), zout = $('zoomOut'), zreset = $('zoomReset');
+    function apply() {
+      kNow = W / view.w;
+      svg.setAttribute('viewBox', [view.x, view.y, view.w, view.h].map(function (v) { return v.toFixed(2); }).join(' '));
+      svg.style.setProperty('--k', kNow.toFixed(4));
+      var ctm = svg.getScreenCTM(); if (ctm) svg.style.setProperty('--ks', Math.max(1, ctm.a / (1280 / 960)).toFixed(4));
+      var zoomed = kNow > 1.02;
+      svg.classList.toggle('is-zoomed', zoomed);
+      svg.style.touchAction = zoomed ? 'none' : 'pan-y';
+      zreset.hidden = !zoomed; zout.disabled = !zoomed; zin.disabled = kNow >= MAXK - 0.01;
+      if (onZoom) onZoom(kNow);
+    }
+    function clamp() {
+      if (view.w > W) { view.w = W; view.h = H; }
+      view.x = Math.min(Math.max(view.x, 0), W - view.w);
+      view.y = Math.min(Math.max(view.y, 0), H - view.h);
+    }
+    function toUser(cx, cy) { var pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+    function zoomAt(factor, ux, uy) { // keep the map point (ux, uy) under the pointer
+      var nw = Math.min(W, Math.max(W / MAXK, view.w / factor)); factor = view.w / nw;
+      view.x = ux - (ux - view.x) / factor; view.y = uy - (uy - view.y) / factor;
+      view.w = nw; view.h = view.h / factor; clamp(); apply();
+    }
+    function zoomCenter(factor) { zoomAt(factor, view.x + view.w / 2, view.y + view.h / 2); }
+    function reset() { view = { x: 0, y: 0, w: W, h: H }; apply(); }
+    zin.addEventListener('click', function () { zoomCenter(1.6); });
+    zout.addEventListener('click', function () { zoomCenter(1 / 1.6); });
+    zreset.addEventListener('click', reset);
+    svg.addEventListener('wheel', function (ev) {
+      ev.preventDefault();
+      var dy = ev.deltaMode === 1 ? ev.deltaY * 16 : ev.deltaMode === 2 ? ev.deltaY * 300 : ev.deltaY;
+      var p = toUser(ev.clientX, ev.clientY); zoomAt(Math.exp(-dy * 0.002), p.x, p.y);
+    }, { passive: false });
+    svg.addEventListener('dblclick', function (ev) { ev.preventDefault(); var p = toUser(ev.clientX, ev.clientY); zoomAt(ev.shiftKey ? 0.5 : 2, p.x, p.y); });
+    svg.addEventListener('keydown', function (ev) {
+      if (ev.key === '+' || ev.key === '=') { zoomCenter(1.6); ev.preventDefault(); }
+      else if (ev.key === '-' || ev.key === '_') { zoomCenter(1 / 1.6); ev.preventDefault(); }
+      else if (ev.key === '0' || ev.key === 'Escape') { reset(); }
+      else if (/^Arrow/.test(ev.key) && kNow > 1.02) {
+        var step = view.w / 10;
+        view.x += ev.key === 'ArrowRight' ? step : ev.key === 'ArrowLeft' ? -step : 0;
+        view.y += ev.key === 'ArrowDown' ? step : ev.key === 'ArrowUp' ? -step : 0;
+        clamp(); apply(); ev.preventDefault();
+      }
+    });
+    // pointers: one drags (when zoomed), two pinch; a drag must not open the city under the finger
+    var ptrs = {}, moved = 0, pinch = null;
+    function pointerList() { return Object.keys(ptrs).map(function (id) { return ptrs[id]; }); }
+    svg.addEventListener('pointerdown', function (ev) {
+      if (ev.button !== 0 && ev.pointerType === 'mouse') return;
+      ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY }; moved = 0;
+      try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* not capturable */ }
+      var l = pointerList(); if (l.length === 2) pinch = { d: Math.hypot(l[0].x - l[1].x, l[0].y - l[1].y), w: view.w };
+    });
+    svg.addEventListener('pointermove', function (ev) {
+      var p = ptrs[ev.pointerId]; if (!p) return;
+      var l = pointerList();
+      if (l.length === 2 && pinch) {
+        ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY }; l = pointerList();
+        var d = Math.hypot(l[0].x - l[1].x, l[0].y - l[1].y), m = toUser((l[0].x + l[1].x) / 2, (l[0].y + l[1].y) / 2);
+        var target = Math.min(W, Math.max(W / MAXK, pinch.w * pinch.d / Math.max(d, 1)));
+        zoomAt(view.w / target, m.x, m.y); moved += 10;
+        return;
+      }
+      if (kNow <= 1.02) { ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY }; return; } // the whole country: nothing to pan
+      var a = svg.getScreenCTM().a || 1, dx = ev.clientX - p.x, dy = ev.clientY - p.y;
+      moved += Math.abs(dx) + Math.abs(dy);
+      view.x -= dx / a; view.y -= dy / a; clamp(); apply();
+      ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
+    });
+    function up(ev) { delete ptrs[ev.pointerId]; if (pointerList().length < 2) pinch = null; }
+    svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up);
+    svg.addEventListener('click', function (ev) { if (moved > 6) { ev.preventDefault(); ev.stopPropagation(); } }, true);
+    svg.setAttribute('tabindex', '0');
+    window.addEventListener('resize', apply);
+    apply();
+  } // a neighbourhood sits under its city (lqa.seattle.here.events, 2026-10-11)
 
   Promise.all([fetch('us-outline.json').then(function (r) { return r.json(); }), fetch('cities.json').then(function (r) { return r.json(); })]).then(function (res) {
     var o = res[0], cities = res[1].cities, project = projector(o);
@@ -59,9 +146,11 @@
     svg.setAttribute('viewBox', '0 0 ' + o.width + ' ' + o.height);
     var land = el('g', { 'class': 'land' }, svg);
     ['lower48', 'alaska', 'hawaii'].forEach(function (k) { el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });
+    // the state boundaries: stroke only, over the land, under the dots; the line keeps its width at every zoom
+    if (o.paths.states) el('path', { d: o.paths.states, 'class': 'states', 'vector-effect': 'non-scaling-stroke' }, el('g', { 'class': 'borders' }, svg));
     // a faint frame line between the insets and the mainland, as atlases draw it
     el('path', { d: 'M' + (o.tx - 0.42 * o.scale).toFixed(0) + ' ' + (o.ty + 0.165 * o.scale).toFixed(0) + 'h' + (0.30 * o.scale).toFixed(0) + 'v' + (0.12 * o.scale).toFixed(0), 'class': 'inset-line' }, svg);
-    var pins = el('g', { 'class': 'pins' }, svg);
+    var pins = el('g', { 'class': 'pins' }, svg), placed = [];
     cities.forEach(function (c) {
       var p = project(c.lon, c.lat), x = +p[0].toFixed(1), y = +p[1].toFixed(1);
       var a = el('a', { href: site(c), 'class': 'pin' + (c.live ? ' is-live' : ' is-soon'), 'data-key': c.key }, pins);
@@ -74,6 +163,7 @@
       el('circle', { cx: x, cy: y, r: 4.2, 'class': 'dot' }, a);
       var t = el('text', { x: x + lb.dx, y: y + lb.dy, 'text-anchor': lb.anchor, 'class': 'label' }, a);
       t.textContent = c.name;
+      placed.push({ x: x, y: y, dx: lb.dx, dy: lb.dy, text: t, leader: far ? a.firstChild : null });
     });
     // the list under the map: state, city, link
     var ul = $('cityList'); ul.textContent = '';
@@ -90,5 +180,12 @@
     });
     var live = cities.filter(function (c) { return c.live; }).length;
     $('count').textContent = live + ' live, ' + (cities.length - live) + ' on the way';
+    zoomable(svg, o.width, o.height, function (k) { // names and leaders keep their screen offset from the dot
+      var ks = parseFloat(svg.style.getPropertyValue('--ks')) || 1; k = Math.max(k, ks);
+      placed.forEach(function (q) {
+        q.text.setAttribute('x', (q.x + q.dx / k).toFixed(1)); q.text.setAttribute('y', (q.y + q.dy / k).toFixed(1));
+        if (q.leader) { q.leader.setAttribute('x2', (q.x + q.dx * 0.8 / k).toFixed(1)); q.leader.setAttribute('y2', (q.y + (q.dy - 4) * 0.8 / k).toFixed(1)); }
+      });
+    });
   }).catch(function (e) { $('count').textContent = 'The map could not load (' + e.message + ').'; });
 })();

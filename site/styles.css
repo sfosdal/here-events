@@ -58,10 +58,22 @@ h1 .dot { color: var(--gold); }
    masthead leaves; the svg letterboxes (preserveAspectRatio meet), so a wide screen centres it. The list follows on scroll. ---- */
 .fold { height: 100svh; min-height: 34rem; display: grid; grid-template-rows: auto minmax(0, 1fr); }
 .map { width: min(var(--pagew), 100% - 3rem); margin: .8rem auto 0; padding-bottom: .8rem; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
-#usMap { display: block; width: 100%; height: 100%; min-height: 0; }
+.map-stage { position: relative; min-height: 0; }
+#usMap { display: block; width: 100%; height: 100%; min-height: 0; touch-action: pan-y; cursor: grab; outline: none; }
+#usMap.is-zoomed { cursor: grab; }
+#usMap.is-zoomed:active { cursor: grabbing; }
+#usMap:focus-visible { box-shadow: 0 0 0 2px var(--ink-soft); border-radius: .4rem; }
+/* zoom buttons: the theme pill's look, stacked at the map's corner */
+.zoom { position: absolute; right: .4rem; bottom: .4rem; display: flex; flex-direction: column; gap: .25rem; }
+.zoom button { width: 2.1rem; height: 2.1rem; display: grid; place-items: center; border: 1px solid var(--line); border-radius: .55rem; background: var(--mist); color: var(--ink); font: 600 1.15rem/1 var(--body); cursor: pointer; }
+.zoom button svg { width: 1rem; height: 1rem; }
+.zoom button:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+.zoom button:disabled { opacity: .4; cursor: default; }
+.zoom button[hidden] { display: none; }
 main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .inset-line { fill: none; stroke: var(--land-edge); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; opacity: .7; }
+.states { fill: none; stroke: var(--land-edge); stroke-width: .7; stroke-opacity: .75; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
 .pin { cursor: pointer; text-decoration: none; }
 .pin .halo { fill: var(--gold); opacity: .18; transition: opacity .15s, r .15s; }
 .pin .dot { fill: var(--gold); stroke: var(--sky); stroke-width: 1.5; }
@@ -70,10 +82,17 @@ main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .pin.is-soon .dot { fill: var(--ink-soft); opacity: .7; }
 .pin.is-soon .halo { fill: var(--ink-soft); opacity: .12; }
 .pin.is-soon .label { fill: var(--ink-soft); font-weight: 500; }
-.pin:hover .halo, .pin:focus-visible .halo { opacity: .45; r: 11; }
+.pin:hover .halo, .pin:focus-visible .halo { opacity: .45; r: calc(11px / var(--k, 1)); }
 .pin:hover .label, .pin:focus-visible .label { fill: var(--gold); }
 .pin:focus-visible { outline: none; }
 .pin:focus-visible .dot { stroke: var(--ink); stroke-width: 2.5; }
+/* zoomed in: dots and halos keep their on-screen size (--k = the zoom ratio, set by map.js); names are set in screen
+   pixels on every screen (--ks = screen px per map unit over the 1280-wide desktop's 1.333, never under 1, so the
+   unzoomed desktop and the share card keep their look and a zoomed phone gets readable names) */
+.pin .halo { r: calc(7px / var(--k, 1)); }
+.pin .dot { r: calc(4.2px / var(--k, 1)); stroke-width: calc(1.5px / var(--k, 1)); }
+.pin:focus-visible .dot { stroke-width: calc(2.5px / var(--k, 1)); }
+.pin .label { font-size: calc(13px / var(--ks, 1)); stroke-width: calc(3px / var(--ks, 1)); }
 figcaption { display: flex; gap: 1.2rem; align-items: center; justify-content: center; margin-top: .4rem; font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
 .key { display: inline-flex; align-items: center; gap: .4rem; }
 .sw { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: var(--gold); }
@@ -110,8 +129,9 @@ footer { background: var(--ink); color: var(--sky); }
   .masthead { flex-direction: column; margin-top: 1.4rem; }
   .masthead-tools { order: -1; align-self: flex-end; }
   .pin .label, .pin .leader { display: none; }
-  .pin .dot { r: 6; }
-  .pin .halo { r: 11; }
+  #usMap.is-zoomed .pin .label, #usMap.is-zoomed .pin .leader { display: initial; } /* zoomed in there is room for the names */
+  .pin .dot { r: calc(6px / var(--k, 1)); }
+  .pin .halo { r: calc(11px / var(--k, 1)); }
   figcaption { flex-wrap: wrap; }
   .count { margin-left: 0; width: 100%; text-align: center; }
   .foot-inner { flex-direction: column; align-items: flex-start; }
@@ -123,7 +143,7 @@ footer { background: var(--ink); color: var(--sky); }
 :root[data-share] .masthead { padding: 0 0 0 56px; margin: 0; display: block; }
 :root[data-share] .masthead h1 { font-size: 72px; line-height: .9; }
 :root[data-share] .masthead .sub { max-width: 300px; font-size: 16px; }
-:root[data-share] .theme-toggle, :root[data-share] figcaption, :root[data-share] .cities, :root[data-share] footer { display: none !important; }
+:root[data-share] .theme-toggle, :root[data-share] figcaption, :root[data-share] .cities, :root[data-share] footer, :root[data-share] .zoom { display: none !important; }
 :root[data-share] .fold { display: contents; } /* the masthead and the map are the card's two columns */
 :root[data-share] .map { margin: 0; padding: 0 24px 0 0; display: block; width: auto; }
 :root[data-share] #usMap { height: auto; aspect-ratio: 960 / 600; }
