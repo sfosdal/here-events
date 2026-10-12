@@ -1,7 +1,7 @@
 {
   "_": "The covered cities: key = the subdomain (<key>.here.events), live = the site answers at that address today (false = built, not yet live). label: where the name sits beside its dot on the wide-screen map (dx/dy in map units, anchor start|end|middle), hand-set so the clusters read. Edit this file to add a city.",
   "cities": [
-    { "key": "lqa",       "name": "Lower Queen Anne", "city": "Seattle",     "state": "WA", "lat": 47.624, "lon": -122.355, "tz": "America/Los_Angeles", "live": true,  "label": { "dx": -16, "dy": 7, "anchor": "end" } },
+    { "key": "lqa",       "url": "https://lqa.seattle.here.events/", "name": "Lower Queen Anne", "city": "Seattle",     "state": "WA", "lat": 47.624, "lon": -122.355, "tz": "America/Los_Angeles", "live": true,  "label": { "dx": -16, "dy": 7, "anchor": "end" } },
     { "key": "everett",   "name": "Everett",          "city": "Everett",     "state": "WA", "lat": 47.979, "lon": -122.202, "tz": "America/Los_Angeles", "live": true,  "label": { "dx": 12, "dy": -14, "anchor": "start" } },
     { "key": "forks",     "name": "Forks",            "city": "Forks",       "state": "WA", "lat": 47.950, "lon": -124.385, "tz": "America/Los_Angeles", "live": false, "label": { "dx": -10, "dy": -12, "anchor": "end" } },
     { "key": "spokane",   "name": "Spokane",          "city": "Spokane",     "state": "WA", "lat": 47.658, "lon": -117.426, "tz": "America/Los_Angeles", "live": false, "label": { "dx": 10, "dy": -8, "anchor": "start" } },

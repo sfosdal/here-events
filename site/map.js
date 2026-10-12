@@ -51,7 +51,7 @@
     if (parent) parent.appendChild(e);
     return e;
   }
-  function site(c) { return 'https://' + c.key + '.here.events/'; }
+  function site(c) { return c.url || 'https://' + c.key + '.here.events/'; } // a neighbourhood sits under its city (lqa.seattle.here.events, 2026-10-11)
 
   Promise.all([fetch('us-outline.json').then(function (r) { return r.json(); }), fetch('cities.json').then(function (r) { return r.json(); })]).then(function (res) {
     var o = res[0], cities = res[1].cities, project = projector(o);
@@ -84,7 +84,7 @@
         var li = document.createElement('li'); li.className = c.live ? 'is-live' : 'is-soon';
         var s = document.createElement('span'); s.className = 'st'; s.textContent = c.state; li.appendChild(s);
         var a = document.createElement('a'); a.href = site(c); a.textContent = c.name; li.appendChild(a);
-        var n = document.createElement('span'); n.className = 'note'; n.textContent = c.live ? c.key + '.here.events' : 'coming soon'; li.appendChild(n);
+        var n = document.createElement('span'); n.className = 'note'; n.textContent = c.live ? site(c).replace(/^https:\/\/|\/$/g, '') : 'coming soon'; li.appendChild(n);
         ul.appendChild(li);
       });
     });
