@@ -3,19 +3,20 @@
   "cities": [
     { "key": "lqa",       "url": "https://lqa.seattle.here.events/", "name": "Lower Queen Anne", "city": "Seattle",     "state": "WA", "lat": 47.624, "lon": -122.355, "tz": "America/Los_Angeles", "live": true,  "label": { "dx": -16, "dy": 7, "anchor": "end" } },
     { "key": "everett",   "name": "Everett",          "city": "Everett",     "state": "WA", "lat": 47.979, "lon": -122.202, "tz": "America/Los_Angeles", "live": true,  "label": { "dx": 12, "dy": -14, "anchor": "start" } },
-    { "key": "forks",     "name": "Forks",            "city": "Forks",       "state": "WA", "lat": 47.950, "lon": -124.385, "tz": "America/Los_Angeles", "live": false, "label": { "dx": -10, "dy": -12, "anchor": "end" } },
-    { "key": "spokane",   "name": "Spokane",          "city": "Spokane",     "state": "WA", "lat": 47.658, "lon": -117.426, "tz": "America/Los_Angeles", "live": false, "label": { "dx": 10, "dy": -8, "anchor": "start" } },
-    { "key": "pullman",   "name": "Pullman",          "city": "Pullman",     "state": "WA", "lat": 46.732, "lon": -117.180, "tz": "America/Los_Angeles", "live": false, "label": { "dx": 10, "dy": 14, "anchor": "start" } },
-    { "key": "portland",  "name": "Portland",         "city": "Portland",    "state": "OR", "lat": 45.515, "lon": -122.678, "tz": "America/Los_Angeles", "live": false, "label": { "dx": -10, "dy": 4, "anchor": "end" } },
-    { "key": "sandiego",  "name": "San Diego",        "city": "San Diego",   "state": "CA", "lat": 32.716, "lon": -117.161, "tz": "America/Los_Angeles", "live": false, "label": { "dx": -10, "dy": 4, "anchor": "end" } },
-    { "key": "honolulu",  "name": "Honolulu",         "city": "Honolulu",    "state": "HI", "lat": 21.307, "lon": -157.858, "tz": "Pacific/Honolulu",     "live": false, "label": { "dx": 10, "dy": 14, "anchor": "start" } },
-    { "key": "austin",    "name": "Austin",           "city": "Austin",      "state": "TX", "lat": 30.267, "lon": -97.743,  "tz": "America/Chicago",      "live": false, "label": { "dx": 10, "dy": 4, "anchor": "start" } },
-    { "key": "stlouis",   "name": "St. Louis",        "city": "St. Louis",   "state": "MO", "lat": 38.627, "lon": -90.199,  "tz": "America/Chicago",      "live": false, "label": { "dx": 10, "dy": 14, "anchor": "start" } },
+    { "key": "forks",     "name": "Forks",            "city": "Forks",       "state": "WA", "lat": 47.950, "lon": -124.385, "tz": "America/Los_Angeles", "live": true , "label": { "dx": -10, "dy": -12, "anchor": "end" } },
+    { "key": "spokane",   "name": "Spokane",          "city": "Spokane",     "state": "WA", "lat": 47.658, "lon": -117.426, "tz": "America/Los_Angeles", "live": true , "label": { "dx": 10, "dy": -8, "anchor": "start" } },
+    { "key": "pullman",   "name": "Pullman",          "city": "Pullman",     "state": "WA", "lat": 46.732, "lon": -117.180, "tz": "America/Los_Angeles", "live": true , "label": { "dx": 10, "dy": 14, "anchor": "start" } },
+    { "key": "portland",  "name": "Portland",         "city": "Portland",    "state": "OR", "lat": 45.515, "lon": -122.678, "tz": "America/Los_Angeles", "live": true , "label": { "dx": -10, "dy": 4, "anchor": "end" } },
+    { "key": "sandiego",  "name": "San Diego",        "city": "San Diego",   "state": "CA", "lat": 32.716, "lon": -117.161, "tz": "America/Los_Angeles", "live": true , "label": { "dx": -10, "dy": 4, "anchor": "end" } },
+    { "key": "lasvegas",  "name": "Las Vegas",        "city": "Las Vegas",   "state": "NV", "lat": 36.170, "lon": -115.140, "tz": "America/Los_Angeles", "live": true,  "label": { "dx": 10, "dy": -6, "anchor": "start" } },
+    { "key": "honolulu",  "name": "Honolulu",         "city": "Honolulu",    "state": "HI", "lat": 21.307, "lon": -157.858, "tz": "Pacific/Honolulu",     "live": true , "label": { "dx": 10, "dy": 14, "anchor": "start" } },
+    { "key": "austin",    "name": "Austin",           "city": "Austin",      "state": "TX", "lat": 30.267, "lon": -97.743,  "tz": "America/Chicago",      "live": true , "label": { "dx": 10, "dy": 4, "anchor": "start" } },
+    { "key": "stlouis",   "name": "St. Louis",        "city": "St. Louis",   "state": "MO", "lat": 38.627, "lon": -90.199,  "tz": "America/Chicago",      "live": true , "label": { "dx": 10, "dy": 14, "anchor": "start" } },
     { "key": "chicago",   "name": "Chicago",          "city": "Chicago",     "state": "IL", "lat": 41.881, "lon": -87.632,  "tz": "America/Chicago",      "live": true,  "label": { "dx": 12, "dy": 10, "anchor": "start" } },
-    { "key": "milwaukee", "name": "Milwaukee",        "city": "Milwaukee",   "state": "WI", "lat": 43.039, "lon": -87.906,  "tz": "America/Chicago",      "live": false, "label": { "dx": 12, "dy": -4, "anchor": "start" } },
-    { "key": "madison",   "name": "Madison",          "city": "Madison",     "state": "WI", "lat": 43.073, "lon": -89.401,  "tz": "America/Chicago",      "live": false, "label": { "dx": -10, "dy": 14, "anchor": "end" } },
-    { "key": "lacrosse",  "name": "La Crosse",        "city": "La Crosse",   "state": "WI", "lat": 43.801, "lon": -91.240,  "tz": "America/Chicago",      "live": false, "label": { "dx": -10, "dy": -6, "anchor": "end" } },
-    { "key": "greenbay",  "name": "Green Bay",        "city": "Green Bay",   "state": "WI", "lat": 44.513, "lon": -88.013,  "tz": "America/Chicago",      "live": false, "label": { "dx": 10, "dy": -10, "anchor": "start" } },
-    { "key": "atlanta",   "name": "Atlanta",          "city": "Atlanta",     "state": "GA", "lat": 33.749, "lon": -84.388,  "tz": "America/New_York",     "live": false, "label": { "dx": 12, "dy": 4, "anchor": "start" } }
+    { "key": "milwaukee", "name": "Milwaukee",        "city": "Milwaukee",   "state": "WI", "lat": 43.039, "lon": -87.906,  "tz": "America/Chicago",      "live": true , "label": { "dx": 12, "dy": -4, "anchor": "start" } },
+    { "key": "madison",   "name": "Madison",          "city": "Madison",     "state": "WI", "lat": 43.073, "lon": -89.401,  "tz": "America/Chicago",      "live": true , "label": { "dx": -10, "dy": 14, "anchor": "end" } },
+    { "key": "lacrosse",  "name": "La Crosse",        "city": "La Crosse",   "state": "WI", "lat": 43.801, "lon": -91.240,  "tz": "America/Chicago",      "live": true , "label": { "dx": -10, "dy": -6, "anchor": "end" } },
+    { "key": "greenbay",  "name": "Green Bay",        "city": "Green Bay",   "state": "WI", "lat": 44.513, "lon": -88.013,  "tz": "America/Chicago",      "live": true , "label": { "dx": 10, "dy": -10, "anchor": "start" } },
+    { "key": "atlanta",   "name": "Atlanta",          "city": "Atlanta",     "state": "GA", "lat": 33.749, "lon": -84.388,  "tz": "America/New_York",     "live": true , "label": { "dx": 12, "dy": 4, "anchor": "start" } }
   ]
 }
