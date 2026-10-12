@@ -1,0 +1,122 @@
+/* here.events — the front door. The palette, faces and theme pill are the city
+   sites' (lqa-events styles.css), so the page reads as the family's. */
+:root {
+  --sky: #edf1f4; --mist: #ffffff; --ink: #1b2733; --ink-soft: #55636f; --ink-bright: #1b2733;
+  --line: #c9d2da; --gold: #e8791d; --gold-soft: #fbe9d8;
+  --land: #dfe6ec; --land-edge: #9fb0bf;
+  --display: "Big Shoulders", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --pagew: 62rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2; --ink-bright: #ffffff;
+    --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
+    --land: #1d252e; --land-edge: #4a5a6a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2; --ink-bright: #ffffff;
+  --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
+  --land: #1d252e; --land-edge: #4a5a6a;
+}
+:root[data-theme="light"] { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html { overflow-x: clip; }
+body {
+  margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+  background: var(--sky); color: var(--ink); font: 16px/1.5 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
+a { color: inherit; }
+
+/* ---- masthead ---- */
+.masthead { width: min(var(--pagew), 100% - 2rem); margin: 2.2rem auto 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.eyebrow { margin: 0; font-family: var(--mono); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+h1 { margin: .1rem 0 0; font-family: var(--display); font-weight: 700; font-size: clamp(2.8rem, 8vw, 4.6rem); line-height: .95; letter-spacing: -.01em; text-transform: uppercase; color: var(--ink-bright); }
+h1 .dot { color: var(--gold); }
+.sub { color: var(--ink-soft); max-width: 36rem; margin: .9rem 0 0; }
+.masthead-tools { flex: none; padding-top: .3rem; }
+
+/* the theme pill, as the city sites draw it */
+.theme-toggle { position: relative; display: inline-flex; align-items: center; gap: 0; padding: .2rem; border: 1px solid var(--line); border-radius: 999px; background: var(--mist); }
+.theme-toggle button { position: relative; z-index: 1; width: 2rem; height: 2rem; display: grid; place-items: center; background: none; border: 0; padding: 0; color: var(--ink-soft); border-radius: 999px; cursor: pointer; }
+.theme-toggle button svg { width: 1rem; height: 1rem; }
+.theme-toggle button[aria-checked="true"] { color: var(--sky); }
+.theme-toggle button:not([aria-checked="true"]):hover { color: var(--ink); }
+.theme-knob { position: absolute; top: .2rem; left: .2rem; width: 2rem; height: 2rem; border-radius: 999px; background: var(--ink); transition: left .18s; }
+.theme-toggle[data-active="dark"] .theme-knob { left: calc(.2rem + 2rem); }
+.theme-toggle[data-active="system"] .theme-knob { left: calc(.2rem + 4rem); }
+
+/* ---- the map ---- */
+main { width: min(var(--pagew), 100% - 2rem); margin: 0 auto; flex: 1; }
+.map { margin: 1.6rem 0 0; }
+#usMap { display: block; width: 100%; height: auto; aspect-ratio: 960 / 600; }
+.land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.inset-line { fill: none; stroke: var(--land-edge); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; opacity: .7; }
+.pin { cursor: pointer; text-decoration: none; }
+.pin .halo { fill: var(--gold); opacity: .18; transition: opacity .15s, r .15s; }
+.pin .dot { fill: var(--gold); stroke: var(--sky); stroke-width: 1.5; }
+.pin .leader { stroke: var(--ink-soft); stroke-width: 1; opacity: .6; vector-effect: non-scaling-stroke; }
+.pin .label { font: 700 13px/1 var(--display); letter-spacing: .02em; text-transform: uppercase; fill: var(--ink); paint-order: stroke; stroke: var(--sky); stroke-width: 3px; stroke-linejoin: round; }
+.pin.is-soon .dot { fill: var(--ink-soft); opacity: .7; }
+.pin.is-soon .halo { fill: var(--ink-soft); opacity: .12; }
+.pin.is-soon .label { fill: var(--ink-soft); font-weight: 500; }
+.pin:hover .halo, .pin:focus-visible .halo { opacity: .45; r: 11; }
+.pin:hover .label, .pin:focus-visible .label { fill: var(--gold); }
+.pin:focus-visible { outline: none; }
+.pin:focus-visible .dot { stroke: var(--ink); stroke-width: 2.5; }
+figcaption { display: flex; gap: 1.2rem; align-items: center; justify-content: center; margin-top: .4rem; font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.key { display: inline-flex; align-items: center; gap: .4rem; }
+.sw { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: var(--gold); }
+.sw.soon { background: var(--ink-soft); opacity: .7; }
+.count { margin-left: auto; }
+
+/* ---- the list ---- */
+.cities { margin: 1.8rem 0 2.5rem; }
+.cities h2 { font-family: var(--display); font-weight: 700; font-size: 1.6rem; text-transform: uppercase; letter-spacing: .02em; margin: 0 0 .6rem; }
+.city-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: .35rem .9rem; }
+.city-list li { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: baseline; gap: .6rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--mist); }
+.city-list .st { font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; color: var(--gold); }
+.city-list a { font-family: var(--display); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; text-decoration: none; }
+.city-list a:hover { color: var(--gold); }
+.city-list .note { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; color: var(--ink-soft); text-transform: uppercase; }
+.city-list li.is-soon a { color: var(--ink-soft); font-weight: 500; }
+.city-list li.is-soon .st { color: var(--ink-soft); }
+
+/* ---- footer ---- */
+footer { background: var(--ink); color: var(--sky); }
+:root[data-theme="dark"] footer, :root:not([data-theme="light"]) footer { background: #0e1318; color: var(--ink); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) footer { background: var(--ink); color: var(--sky); } }
+.foot-inner { width: min(var(--pagew), 100% - 2rem); margin: 0 auto; padding: .7rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; white-space: nowrap; }
+.gw { display: flex; align-items: center; gap: .7rem; text-decoration: none; }
+.gw-logo { width: 32px; height: 32px; color: #fff; flex: none; }
+.gw-credit { margin: 0; font-family: var(--mono); font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.foot-note { margin: 0; font-size: .72rem; opacity: .75; white-space: normal; text-align: right; }
+
+/* ---- narrow screens: the map keeps its dots, drops the always-on names (the list below carries them) ---- */
+@media (max-width: 700px) {
+  .masthead { flex-direction: column; margin-top: 1.4rem; }
+  .masthead-tools { order: -1; align-self: flex-end; }
+  .pin .label, .pin .leader { display: none; }
+  .pin .dot { r: 6; }
+  .pin .halo { r: 11; }
+  figcaption { flex-wrap: wrap; }
+  .count { margin-left: 0; width: 100%; text-align: center; }
+  .foot-inner { flex-direction: column; align-items: flex-start; }
+  .foot-note { text-align: left; }
+}
+
+/* ---- ?share: the 1200x630 Open Graph card (scripts/share step; never seen by readers) ---- */
+:root[data-share] body { width: 1200px; height: 630px; overflow: hidden; margin: 0; padding: 0; display: grid; grid-template-columns: 400px 1fr; align-items: center; gap: 0; }
+:root[data-share] .masthead { padding: 0 0 0 56px; margin: 0; display: block; }
+:root[data-share] .masthead h1 { font-size: 72px; line-height: .9; }
+:root[data-share] .masthead .sub { max-width: 300px; font-size: 16px; }
+:root[data-share] .theme-toggle, :root[data-share] figcaption, :root[data-share] .cities, :root[data-share] footer { display: none !important; }
+:root[data-share] .map { margin: 0; padding: 0 24px 0 0; }
+:root[data-share] .pin .label, :root[data-share] .pin .leader { display: initial; }
