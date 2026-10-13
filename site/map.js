@@ -39,12 +39,16 @@
     var raw = conic(p0, p1), c = raw(center[0] * rad, center[1] * rad);
     return function (lon, lat) { var p = raw((lon + rotLon) * rad, lat * rad); return [tx + scale * (p[0] - c[0]), ty - scale * (p[1] - c[1])]; };
   }
-  function projector(o) { // o: the outline file's width/height/scale/tx/ty
-    var K = o.scale, TX = o.tx, TY = o.ty;
-    var lower48 = make(29.5, 45.5, 96, [-0.6, 38.7], K, TX, TY);
-    var alaska = make(55, 65, 154, [-2, 58.5], K * 0.35, TX - 0.307 * K, TY + 0.201 * K);
-    var hawaii = make(8, 18, 157, [-3, 19.9], K, TX - 0.205 * K, TY + 0.212 * K);
-    return function (lon, lat) { return (lat > 50 ? alaska : lat < 23 && lon < -140 ? hawaii : lower48)(lon, lat); };
+  function projector(o) { // o: the outline file's width/height/scale/tx/ty and the insets' translations (build-map.mjs packs them bottom-left)
+    var K = o.scale, I = o.insets;
+    var lower48 = make(29.5, 45.5, 96, [-0.6, 38.7], K, o.tx, o.ty);
+    var alaska = make(55, 65, 154, [-2, 58.5], K * 0.35, I.alaska[0], I.alaska[1]);
+    var hawaii = make(8, 18, 157, [-3, 19.9], K, I.hawaii[0], I.hawaii[1]);
+    var pr = make(17, 19, 66.5, [0, 18.2], K, I.pr[0], I.pr[1]);
+    return function (lon, lat) {
+      if (lon > 0) lon -= 360; // the western Aleutians, past 180°
+      return (lat > 50 ? alaska : lat < 23 && lon < -140 ? hawaii : lat < 20 && lon > -70 && lon < -64 ? pr : lower48)(lon, lat);
+    };
   }
 
   var NS = 'http://www.w3.org/2000/svg';
@@ -147,14 +151,23 @@
     var o = res[0], cities = res[1].cities, project = projector(o);
     var svg = $('usMap');
     svg.setAttribute('viewBox', '0 0 ' + o.width + ' ' + o.height);
+    // the neighbours at half tone (Canada, Mexico, Cuba, …), under everything: clipped to the frame less the inset box
+    // around the lower 48, and to the inset box around Alaska (Steve, 2026-10-13: "grey them out half compared to US")
+    var box = o.insets.box, defs = el('defs', {}, svg);
+    el('path', { d: 'M0 0H' + o.width + 'V' + o.height + 'H0Z' + 'M' + box.x + ' ' + box.y + 'H' + box.w + 'V' + box.h + 'H' + box.x + 'Z', 'clip-rule': 'evenodd' }, el('clipPath', { id: 'clipMain' }, defs));
+    el('rect', { x: box.x, y: box.y, width: box.w - box.x, height: box.h - box.y }, el('clipPath', { id: 'clipInset' }, defs));
+    var far = el('g', { 'class': 'far' }, svg);
+    [['far', 'clipMain', 'fill'], ['farEdge', 'clipMain', 'edge'], ['farAlaska', 'clipInset', 'fill'], ['farAlaskaEdge', 'clipInset', 'edge']].forEach(function (q) {
+      if (o.paths[q[0]]) el('path', { d: o.paths[q[0]], 'clip-path': 'url(#' + q[1] + ')', 'class': 'far-' + q[2] }, far);
+    });
     var land = el('g', { 'class': 'land' }, svg);
-    ['lower48', 'alaska', 'hawaii'].forEach(function (k) { el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });
+    ['lower48', 'alaska', 'hawaii', 'pr'].forEach(function (k) { if (o.paths[k]) el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });
     // the state boundaries: stroke only, over the land, under the dots; the line keeps its width at every zoom
     if (o.paths.states) el('path', { d: o.paths.states, 'class': 'states', 'vector-effect': 'non-scaling-stroke' }, el('g', { 'class': 'borders' }, svg));
     // the big lakes as water over land and borders (the sources count them as land), shoreline stroked
     if (o.paths.lakes) el('path', { d: o.paths.lakes, 'class': 'lakes', 'vector-effect': 'non-scaling-stroke' }, svg);
     // a faint frame line between the insets and the mainland, as atlases draw it
-    el('path', { d: 'M' + (o.tx - 0.42 * o.scale).toFixed(0) + ' ' + (o.ty + 0.165 * o.scale).toFixed(0) + 'h' + (0.30 * o.scale).toFixed(0) + 'v' + (0.12 * o.scale).toFixed(0), 'class': 'inset-line' }, svg);
+    el('path', { d: 'M' + box.x + ' ' + box.y + 'H' + box.w + 'V' + box.h, 'class': 'inset-line' }, svg);
     var pins = el('g', { 'class': 'pins' }, svg), placed = [];
     cities.forEach(function (c) {
       var p = project(c.lon, c.lat), x = +p[0].toFixed(1), y = +p[1].toFixed(1);

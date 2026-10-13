@@ -71,6 +71,9 @@ h1 .dot { color: var(--gold); }
 .zoom button:disabled { opacity: .4; cursor: default; }
 .zoom button[hidden] { display: none; }
 main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
+.far path { pointer-events: none; vector-effect: non-scaling-stroke; }
+.far-fill { fill: color-mix(in srgb, var(--land) 50%, var(--sky)); stroke: none; }
+.far-edge { fill: none; stroke: color-mix(in srgb, var(--land-edge) 50%, var(--sky)); stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; }
 .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .inset-line { fill: none; stroke: var(--land-edge); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; opacity: .7; }
 .lakes { fill: var(--sky); fill-rule: evenodd; stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
