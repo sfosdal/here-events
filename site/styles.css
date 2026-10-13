@@ -73,6 +73,7 @@ h1 .dot { color: var(--gold); }
 main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .inset-line { fill: none; stroke: var(--land-edge); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; opacity: .7; }
+.lakes { fill: var(--sky); fill-rule: evenodd; stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
 .states { fill: none; stroke: var(--land-edge); stroke-width: .7; stroke-opacity: .75; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
 .pin { cursor: pointer; text-decoration: none; }
 .pin .halo { fill: var(--gold); opacity: .18; transition: opacity .15s, r .15s; }

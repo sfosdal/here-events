@@ -25,6 +25,7 @@ async function load(name) {
 }
 const countries = await load('ne_50m_admin_0_countries');
 const states = await load('ne_50m_admin_1_states_provinces');
+const lakes = await load('ne_50m_lakes');
 const us = countries.features.find((f) => f.properties.ADMIN === 'United States of America' || f.properties.NAME === 'United States of America');
 if (!us) throw new Error('United States not found in the countries file');
 const usStates = states.features.filter((f) => f.properties.adm0_a3 === 'USA' || f.properties.iso_a2 === 'US');
@@ -65,11 +66,22 @@ for (const f of usStates) {
   const polys = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
   for (const poly of polys) for (const ring of poly) stateRings.push(ringPath(ring).d);
 }
+// ---- the big lakes: Natural Earth's countries and states carry the Great Lakes as land (the border runs mid-lake), so the
+// map drew Lake Michigan as Michigan (Steve, 2026-10-13: "the great lakes are missing boundaries, they look bad") — the lakes
+// are drawn as water over the land and the borders, shoreline stroked, from the 1:50m lakes file, the ones an atlas shows at this size
+const BIG_LAKES = new Set(['Lake Superior', 'Lake Michigan', 'Lake Huron', 'Lake Erie', 'Lake Ontario', 'Lake Saint Clair', 'Great Salt Lake', 'Lake Okeechobee']);
+const lakeRings = [];
+for (const f of lakes.features) {
+  if (!BIG_LAKES.has(f.properties.name)) continue;
+  const polys = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
+  for (const poly of polys) for (const ring of poly) lakeRings.push(ringPath(ring).d);
+}
+if (lakeRings.length < BIG_LAKES.size) throw new Error(`expected ${BIG_LAKES.size} lakes, found ${lakeRings.length} rings`);
 const out = {
-  _: 'United States outline from Natural Earth 1:50m admin-0 countries and state boundaries from 1:50m admin-1 states (public domain), projected Albers USA (conic equal-area 29.5°/45.5° for the lower 48; Alaska 55°/65° at 0.35 scale and Hawaii 8°/18° as insets, like d3-geo albersUsa). Built by scripts/build-map.mjs; map.js re-implements the projection to place cities.',
+  _: 'United States outline from Natural Earth 1:50m admin-0 countries, state boundaries from 1:50m admin-1 states and the big lakes from 1:50m lakes (public domain), projected Albers USA (conic equal-area 29.5°/45.5° for the lower 48; Alaska 55°/65° at 0.35 scale and Hawaii 8°/18° as insets, like d3-geo albersUsa). Built by scripts/build-map.mjs; map.js re-implements the projection to place cities.',
   width: W, height: H, scale: K, tx: TX, ty: TY,
-  paths: { lower48: paths.lower48.join(''), alaska: paths.alaska.join(''), hawaii: paths.hawaii.join(''), states: stateRings.join('') },
+  paths: { lower48: paths.lower48.join(''), alaska: paths.alaska.join(''), hawaii: paths.hawaii.join(''), states: stateRings.join(''), lakes: lakeRings.join('') },
 };
 writeFileSync(join(here, '..', 'site', 'us-outline.json'), JSON.stringify(out));
-console.log(`us-outline.json: lower48 ${paths.lower48.length} rings, alaska ${paths.alaska.length}, hawaii ${paths.hawaii.length}, ${stateRings.length} state rings; ${JSON.stringify(out).length} bytes`);
+console.log(`us-outline.json: lower48 ${paths.lower48.length} rings, alaska ${paths.alaska.length}, hawaii ${paths.hawaii.length}, ${stateRings.length} state rings, ${lakeRings.length} lake rings; ${JSON.stringify(out).length} bytes`);
 console.log('Seattle →', project(-122.335, 47.608).map((x) => x.toFixed(1)).join(','), ' Honolulu →', project(-157.858, 21.307).map((x) => x.toFixed(1)).join(','), ' Anchorage →', project(-149.9, 61.2).map((x) => x.toFixed(1)).join(','));

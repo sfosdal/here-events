@@ -113,7 +113,9 @@
     svg.addEventListener('pointerdown', function (ev) {
       if (ev.button !== 0 && ev.pointerType === 'mouse') return;
       ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY }; moved = 0;
-      try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* not capturable */ }
+      // no pointer capture here: capturing on the svg retargets the pointerup, so the click lands on
+      // the svg instead of the pin and no city opens (Steve, 2026-10-13: "cities are not clickable");
+      // the capture waits until the pointer has really dragged (below)
       var l = pointerList(); if (l.length === 2) pinch = { d: Math.hypot(l[0].x - l[1].x, l[0].y - l[1].y), w: view.w };
     });
     svg.addEventListener('pointermove', function (ev) {
@@ -129,6 +131,7 @@
       if (kNow <= 1.02) { ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY }; return; } // the whole country: nothing to pan
       var a = svg.getScreenCTM().a || 1, dx = ev.clientX - p.x, dy = ev.clientY - p.y;
       moved += Math.abs(dx) + Math.abs(dy);
+      if (moved > 6 && !svg.hasPointerCapture(ev.pointerId)) { try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* not capturable */ } } // a real drag: keep it when the pointer leaves the map
       view.x -= dx / a; view.y -= dy / a; clamp(); apply();
       ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
     });
@@ -148,6 +151,8 @@
     ['lower48', 'alaska', 'hawaii'].forEach(function (k) { el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });
     // the state boundaries: stroke only, over the land, under the dots; the line keeps its width at every zoom
     if (o.paths.states) el('path', { d: o.paths.states, 'class': 'states', 'vector-effect': 'non-scaling-stroke' }, el('g', { 'class': 'borders' }, svg));
+    // the big lakes as water over land and borders (the sources count them as land), shoreline stroked
+    if (o.paths.lakes) el('path', { d: o.paths.lakes, 'class': 'lakes', 'vector-effect': 'non-scaling-stroke' }, svg);
     // a faint frame line between the insets and the mainland, as atlases draw it
     el('path', { d: 'M' + (o.tx - 0.42 * o.scale).toFixed(0) + ' ' + (o.ty + 0.165 * o.scale).toFixed(0) + 'h' + (0.30 * o.scale).toFixed(0) + 'v' + (0.12 * o.scale).toFixed(0), 'class': 'inset-line' }, svg);
     var pins = el('g', { 'class': 'pins' }, svg), placed = [];
