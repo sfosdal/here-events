@@ -69,8 +69,8 @@ const region = (lon, lat) => lat > 50 ? 'alaska' : lat < 23 && lon < -140 ? 'haw
 // ---- the inset boxes (map units): Alaska over Hawaii in the left column, Puerto Rico in the Atlantic. Each inset is
 // projected at the origin, measured, then translated to the centre of its box; the boxes are drawn dashed by map.js. ----
 const BOX = { // the top of the Alaska box clears the page's edge fade (7% of the frame = 45 units on a phone)
-  alaska: { x0: 10, y0: 48, x1: 292, y1: 222 },
-  hawaii: { x0: 10, y0: 238, x1: 292, y1: 392 },
+  alaska: { x0: 10, y0: 48, x1: 284, y1: 222 }, // x1 284 (was 292): room for the Lower Queen Anne name under its dot (Steve, 2026-10-14: "no text overlap with the boxes")
+  hawaii: { x0: 10, y0: 238, x1: 284, y1: 392 },
   pr: { x0: 1036, y0: 296, x1: 1180, y1: 372 },
 };
 function bbox(polys, proj) {

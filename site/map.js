@@ -103,7 +103,7 @@
       var zoomed = kNow > 1.02;
       svg.classList.toggle('is-zoomed', zoomed);
       svg.style.touchAction = zoomed ? 'none' : 'pan-y';
-      zreset.hidden = !zoomed; zout.disabled = !zoomed; zin.disabled = kNow >= MAXK - 0.01;
+      zreset.disabled = !zoomed; zout.disabled = !zoomed; zin.disabled = kNow >= MAXK - 0.01; // disabled, never hidden: the column keeps all four buttons
       if (onZoom) onZoom(kNow);
     }
     function clamp() {
@@ -122,17 +122,38 @@
       k = Math.min(MAXK, Math.max(1, k));
       view.w = W / k; view.h = H / k; view.x = ux - view.w / 2; view.y = uy - view.h / 2; clamp(); apply();
     }
-    function reset() { view = { x: 0, y: 0, w: W, h: H }; apply(); }
-    zin.addEventListener('click', function () { zoomCenter(1.6); });
-    zout.addEventListener('click', function () { zoomCenter(1 / 1.6); });
+    function reset() { stopFly(); view = { x: 0, y: 0, w: W, h: H }; apply(); }
+    // flyTo: glide from the current view to a map point at scale k over about a second — the scale eases geometrically,
+    // the centre linearly, ease-in-out — instead of snapping there (Steve, 2026-10-14: "don't jump/snap to it. make the
+    // map zoom into it"); a reduced-motion preference, or any touch of the map, snaps instead. done() runs on landing.
+    var anim = null, reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function stopFly() { if (anim) { cancelAnimationFrame(anim); anim = null; } }
+    function flyTo(ux, uy, k, done) {
+      stopFly();
+      k = Math.min(MAXK, Math.max(1, k));
+      var tw = W / k, th = H / k, tx = Math.min(Math.max(ux - tw / 2, 0), W - tw), ty = Math.min(Math.max(uy - th / 2, 0), H - th);
+      var fx = view.x, fy = view.y, fw = view.w, fh = view.h;
+      if (reduced || (Math.abs(fw - tw) < 0.5 && Math.abs(fx - tx) < 0.5 && Math.abs(fy - ty) < 0.5)) { view = { x: tx, y: ty, w: tw, h: th }; apply(); if (done) done(); return; }
+      var t0 = performance.now(), ms = 1100;
+      anim = requestAnimationFrame(function step(now) {
+        var p = Math.min(1, (now - t0) / ms), e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        var w = fw * Math.pow(tw / fw, e), h = w * H / W;
+        var cx = (fx + fw / 2) + ((tx + tw / 2) - (fx + fw / 2)) * e, cy = (fy + fh / 2) + ((ty + th / 2) - (fy + fh / 2)) * e;
+        view = { x: cx - w / 2, y: cy - h / 2, w: w, h: h }; clamp(); apply();
+        if (p < 1) anim = requestAnimationFrame(step); else { anim = null; if (done) done(); }
+      });
+    }
+    zin.addEventListener('click', function () { stopFly(); zoomCenter(1.6); });
+    zout.addEventListener('click', function () { stopFly(); zoomCenter(1 / 1.6); });
     zreset.addEventListener('click', reset);
     svg.addEventListener('wheel', function (ev) {
-      ev.preventDefault();
+      ev.preventDefault(); stopFly();
       var dy = ev.deltaMode === 1 ? ev.deltaY * 16 : ev.deltaMode === 2 ? ev.deltaY * 300 : ev.deltaY;
       var p = toUser(ev.clientX, ev.clientY); zoomAt(Math.exp(-dy * 0.002), p.x, p.y);
     }, { passive: false });
-    svg.addEventListener('dblclick', function (ev) { ev.preventDefault(); var p = toUser(ev.clientX, ev.clientY); zoomAt(ev.shiftKey ? 0.5 : 2, p.x, p.y); });
+    svg.addEventListener('dblclick', function (ev) { ev.preventDefault(); stopFly(); var p = toUser(ev.clientX, ev.clientY); zoomAt(ev.shiftKey ? 0.5 : 2, p.x, p.y); });
     svg.addEventListener('keydown', function (ev) {
+      stopFly();
       if (ev.key === '+' || ev.key === '=') { zoomCenter(1.6); ev.preventDefault(); }
       else if (ev.key === '-' || ev.key === '_') { zoomCenter(1 / 1.6); ev.preventDefault(); }
       else if (ev.key === '0' || ev.key === 'Escape') { reset(); }
@@ -148,6 +169,7 @@
     function pointerList() { return Object.keys(ptrs).map(function (id) { return ptrs[id]; }); }
     svg.addEventListener('pointerdown', function (ev) {
       if (ev.button !== 0 && ev.pointerType === 'mouse') return;
+      stopFly();
       ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY }; moved = 0;
       // no pointer capture here: capturing on the svg retargets the pointerup, so the click lands on
       // the svg instead of the pin and no city opens (Steve, 2026-10-13: "cities are not clickable");
@@ -177,7 +199,7 @@
     svg.setAttribute('tabindex', '0');
     window.addEventListener('resize', apply);
     apply();
-    return { zoomTo: zoomTo, reset: reset, k: function () { return kNow; } };
+    return { zoomTo: zoomTo, flyTo: flyTo, reset: reset, k: function () { return kNow; } };
   } // a neighbourhood sits under its city (lqa.seattle.here.events, 2026-10-11)
 
   var haversineMi = function (a, b) {
@@ -224,7 +246,7 @@
       el('circle', { cx: x, cy: y, r: 4.2, 'class': 'dot' }, a);
       var t = el('text', { x: x + lb.dx, y: y + lb.dy, 'text-anchor': lb.anchor, 'class': 'label' }, a);
       t.textContent = c.name;
-      placed.push({ x: x, y: y, dx: lb.dx, dy: lb.dy, text: t, leader: far ? a.firstChild : null });
+      placed.push({ x: x, y: y, dx: lb.dx, dy: lb.dy, home: lb, text: t, leader: far ? a.firstChild : null });
       pinOf[c.key] = a;
     });
     // the list under the map: state, city, link
@@ -260,12 +282,41 @@
         }
       } else if (showingFine) swap(false);
     }
-    var zoom = zoomable(svg, W, H, function (k) { // names and leaders keep their screen offset from the dot
-      var ks = parseFloat(svg.style.getPropertyValue('--ks')) || 1, kk = Math.max(k, ks);
-      placed.forEach(function (q) {
-        q.text.setAttribute('x', (q.x + q.dx / kk).toFixed(1)); q.text.setAttribute('y', (q.y + q.dy / kk).toFixed(1));
-        if (q.leader) { q.leader.setAttribute('x2', (q.x + q.dx * 0.8 / kk).toFixed(1)); q.leader.setAttribute('y2', (q.y + (q.dy - 4) * 0.8 / kk).toFixed(1)); }
+    // ---- names keep their screen offset from the dot, and never cross an inset box (Steve, 2026-10-14: "no text overlap
+    // with the boxes"): a name is as wide in map units as the screen is narrow, so a hand-set place that clears the
+    // Alaska box on a wide screen can lie across it on a narrower one. After every zoom or resize each name whose box
+    // (getBBox) touches an inset box tries the other side, under, over, under-right and under-left, and takes the first
+    // place that clears the boxes and the other names — else the one that overlaps the boxes least. ----
+    var boxList = Object.keys(boxes).map(function (k) { return boxes[k]; });
+    function setPos(q, o, kk) {
+      q.text.setAttribute('x', (q.x + o.dx / kk).toFixed(1)); q.text.setAttribute('y', (q.y + o.dy / kk).toFixed(1)); q.text.setAttribute('text-anchor', o.anchor);
+      if (q.leader) { q.leader.setAttribute('x2', (q.x + o.dx * 0.8 / kk).toFixed(1)); q.leader.setAttribute('y2', (q.y + (o.dy - 4) * 0.8 / kk).toFixed(1)); }
+    }
+    function overlap(b, x0, y0, x1, y1) { return Math.max(0, Math.min(b.x + b.width, x1) - Math.max(b.x, x0)) * Math.max(0, Math.min(b.y + b.height, y1) - Math.max(b.y, y0)); }
+    function bbox(t) { try { return t.getBBox(); } catch (e) { return null; } }
+    function keepOffBoxes(kk) {
+      var rects = placed.map(function (q) { return bbox(q.text); });
+      placed.forEach(function (q, i) {
+        var b = rects[i]; if (!b) return;
+        var onBox = function (r) { return boxList.reduce(function (a, x) { return a + overlap(r, x.x0 - 2, x.y0 - 2, x.x1 + 2, x.y1 + 2); }, 0); };
+        if (!onBox(b)) return;
+        var h = q.home, flip = { start: 'end', end: 'start', middle: 'middle' }[h.anchor] || 'start';
+        var opts = [{ dx: -h.dx, dy: h.dy, anchor: flip }, { dx: 0, dy: 18, anchor: 'middle' }, { dx: 0, dy: -12, anchor: 'middle' }, { dx: 12, dy: 18, anchor: 'start' }, { dx: -12, dy: 18, anchor: 'end' }];
+        var best = h, bestScore = onBox(b) * 10 + 1e9; // home only if nothing clears the boxes
+        for (var j = 0; j < opts.length; j++) {
+          setPos(q, opts[j], kk); var r = bbox(q.text); if (!r) continue;
+          var onText = rects.reduce(function (a, c, m) { return m === i || !c ? a : a + overlap(r, c.x, c.y, c.x + c.width, c.y + c.height); }, 0);
+          var score = onBox(r) * 10 + onText;
+          if (score < bestScore) { best = opts[j]; bestScore = score; }
+          if (!score) break;
+        }
+        setPos(q, best, kk); rects[i] = bbox(q.text);
       });
+    }
+    var zoom = zoomable(svg, W, H, function (k) {
+      var ks = parseFloat(svg.style.getPropertyValue('--ks')) || 1, kk = Math.max(k, ks);
+      placed.forEach(function (q) { setPos(q, q.home, kk); });
+      keepOffBoxes(kk);
       wantFine(k);
     });
 
@@ -277,20 +328,22 @@
       var reg = regionOf(lon, lat);
       if (!reg) { say('You are outside the map'); return; }
       var p = project(lon, lat), x = +p[0].toFixed(1), y = +p[1].toFixed(1);
-      if (!you) you = el('g', { 'class': 'you' }, svg);
-      you.textContent = '';
-      el('circle', { cx: x, cy: y, r: 6, 'class': 'you-pulse' }, you);
-      el('circle', { cx: x, cy: y, r: 5, 'class': 'you-dot' }, you);
       var best = null, bestD = Infinity;
       cities.forEach(function (c) { if (!c.live) return; var d = haversineMi({ lat: lat, lon: lon }, c); if (d < bestD) { bestD = d; best = c; } });
-      Object.keys(pinOf).forEach(function (k) { pinOf[k].classList.toggle('is-nearest', best && k === best.key); });
-      if (best) {
-        var a = pinOf[best.key]; a.parentNode.appendChild(a); // on top of its neighbours
-        say('Nearest: ' + best.name + ', ' + Math.round(bestD).toLocaleString() + ' mi');
-      } else say('');
-      zoom.zoomTo(x, y, reg === 'lower48' ? 4 : 3);
+      // glide there first; the marker, the nearest city's light and its name arrive as the move lands
+      zoom.flyTo(x, y, reg === 'lower48' ? 4 : 3, function () {
+        if (!you) you = el('g', { 'class': 'you' }, svg);
+        you.textContent = '';
+        el('circle', { cx: x, cy: y, r: 6, 'class': 'you-pulse' }, you);
+        el('circle', { cx: x, cy: y, r: 5, 'class': 'you-dot' }, you);
+        Object.keys(pinOf).forEach(function (k) { pinOf[k].classList.toggle('is-nearest', best && k === best.key); });
+        if (best) {
+          var a = pinOf[best.key]; a.parentNode.appendChild(a); // on top of its neighbours
+          say('Nearest: ' + best.name + ', ' + Math.round(bestD).toLocaleString() + ' mi');
+        } else say('');
+      });
     }
-    if (!('geolocation' in navigator)) locate.hidden = true;
+    if (!('geolocation' in navigator)) { locate.disabled = true; locate.title = 'Location is not available in this browser'; } // kept in the column, just off
     locate.addEventListener('click', function () {
       locate.disabled = true; say('Finding you…');
       navigator.geolocation.getCurrentPosition(function (pos) {

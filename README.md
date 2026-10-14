@@ -35,7 +35,7 @@ The landing page for the here.events city calendars: a clickable US map
   gradient overlay in `styles.css`).
 - The crosshair button under the zoom buttons asks the browser for the
   reader's location, zooms there, drops a pulsing marker and lights the nearest
-  live city (named with its distance in the caption).
+  live city (named with its distance in the footer, beside the key and the count).
 
 ## Build
 

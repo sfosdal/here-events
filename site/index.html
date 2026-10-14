@@ -51,7 +51,7 @@
   <div class="masthead-text">
     <p class="eyebrow">Local events, one city at a time</p>
     <h1>here<span class="dot">.</span>events</h1>
-    <p class="sub">Each city gets its own calendar: the arenas, stadiums, theatres and music rooms in one list, the home teams' seasons beside it, iCal feeds and a widget you can embed. Pick yours on the map.</p>
+    <!-- no blurb under the title (Steve, 2026-10-14: "this is useless"); the map says it -->
   </div>
   <div class="masthead-tools">
     <div id="themeToggle" class="theme-toggle" role="radiogroup" aria-label="Color theme" data-active="system">
@@ -71,11 +71,13 @@
 
 <figure class="map">
   <div class="map-stage">
-    <svg id="usMap" role="img" aria-labelledby="mapTitle" preserveAspectRatio="xMidYMid meet"><title id="mapTitle">The covered cities on a map of the United States — zoom with the wheel, a pinch or the buttons, drag to pan; the crosshair zooms to where you are</title></svg>
+    <!-- a <desc>, not a <title>: a title pops up as a tooltip over the whole map (Steve, 2026-10-14: "this info popup is useless"); the description is for screen readers only -->
+    <svg id="usMap" role="img" aria-label="The covered cities on a map of the United States" aria-describedby="mapDesc" preserveAspectRatio="xMidYMid meet"><desc id="mapDesc">Zoom with the wheel, a pinch or the buttons, drag to pan; the crosshair zooms to where you are.</desc></svg>
+    <!-- always the same four buttons; one that would do nothing is disabled, never removed (Steve, 2026-10-14: "don't add or remove them keep them all, just disable the ones that mean nothing") -->
     <div class="zoom" role="group" aria-label="Zoom the map">
       <button type="button" id="zoomIn" title="Zoom in (+)" aria-label="Zoom in">+</button>
       <button type="button" id="zoomOut" title="Zoom out (−)" aria-label="Zoom out" disabled>−</button>
-      <button type="button" id="zoomReset" title="The whole country (0)" aria-label="Show the whole country" hidden>
+      <button type="button" id="zoomReset" title="The whole country (0)" aria-label="Show the whole country" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V5a2 2 0 0 1 2-2h4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M9 21H5a2 2 0 0 1-2-2v-4"/></svg>
       </button>
       <!-- zoom to the reader's own location and light the nearest city (Steve, 2026-10-14: "add a zoom to my location thingy") -->
@@ -84,7 +86,6 @@
       </button>
     </div>
   </div>
-  <figcaption><span class="key"><i class="sw live"></i> live</span> <span class="key"><i class="sw soon"></i> coming soon</span> <span id="near" class="near" hidden></span> <span id="count" class="count"></span></figcaption>
 </figure>
 </div>
 
@@ -102,6 +103,8 @@
       <svg class="gw-logo" aria-hidden="true"><use href="#gw-mark"/></svg>
       <p class="gw-credit"><strong>Ghostwood Sites</strong></p>
     </a>
+    <!-- the map's key and count live in the footer, at the right of the lockup (Steve, 2026-10-14: "this part in the proper footer") -->
+    <div class="foot-map"><span class="keys"><span class="key"><i class="sw live"></i> live</span> <span class="key"><i class="sw soon"></i> coming soon</span></span> <span id="near" class="near" hidden></span> <span id="count" class="count"></span></div>
   </div>
 </footer>
 <script src="map.js"></script>
