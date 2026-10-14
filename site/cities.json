@@ -20,6 +20,7 @@
     { "key": "greenbay",  "name": "Green Bay",        "city": "Green Bay",   "state": "WI", "lat": 44.513, "lon": -88.013,  "tz": "America/Chicago",      "live": true , "label": { "dx": 10, "dy": -10, "anchor": "start" } },
     { "key": "atlanta",   "name": "Atlanta",          "city": "Atlanta",     "state": "GA", "lat": 33.749, "lon": -84.388,  "tz": "America/New_York",     "live": true , "label": { "dx": 12, "dy": 4, "anchor": "start" } },
     { "key": "miami",     "name": "Miami",            "city": "Miami",       "state": "FL", "lat": 25.775, "lon": -80.194,  "tz": "America/New_York",     "live": true , "label": { "dx": -10, "dy": 4, "anchor": "end" } },
-    { "key": "nebraska",  "name": "Omaha & Lincoln",  "city": "Omaha",       "state": "NE", "lat": 41.257, "lon": -95.934,  "tz": "America/Chicago",      "live": true , "label": { "dx": -10, "dy": 4, "anchor": "end" } }
+    { "key": "nebraska",  "name": "Omaha & Lincoln",  "city": "Omaha",       "state": "NE", "lat": 41.257, "lon": -95.934,  "tz": "America/Chicago",      "live": true , "label": { "dx": -10, "dy": 4, "anchor": "end" } },
+    { "key": "cancun",    "name": "Cancún",           "city": "Cancún",      "state": "QR", "lat": 21.161, "lon": -86.851,  "tz": "America/Cancun",       "live": false, "label": { "dx": 10, "dy": 4, "anchor": "start" } }
   ]
 }

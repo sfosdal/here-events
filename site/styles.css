@@ -129,7 +129,7 @@ footer { background: var(--ink); color: var(--sky); }
 @media (max-width: 700px) {
   .fold { display: block; height: auto; min-height: 0; } /* a portrait phone: the map is as wide as the screen and as tall as that makes it */
   .map { margin-top: 1.2rem; display: block; }
-  #usMap { height: auto; aspect-ratio: 960 / 600; }
+  #usMap { height: auto; aspect-ratio: 960 / 640; }
   .masthead { flex-direction: column; margin-top: 1.4rem; }
   .masthead-tools { order: -1; align-self: flex-end; }
   .pin .label, .pin .leader { display: none; }
@@ -150,5 +150,5 @@ footer { background: var(--ink); color: var(--sky); }
 :root[data-share] .theme-toggle, :root[data-share] figcaption, :root[data-share] .cities, :root[data-share] footer, :root[data-share] .zoom { display: none !important; }
 :root[data-share] .fold { display: contents; } /* the masthead and the map are the card's two columns */
 :root[data-share] .map { margin: 0; padding: 0 24px 0 0; display: block; width: auto; }
-:root[data-share] #usMap { height: auto; aspect-ratio: 960 / 600; }
+:root[data-share] #usMap { height: auto; aspect-ratio: 960 / 640; }
 :root[data-share] .pin .label, :root[data-share] .pin .leader { display: initial; }

@@ -44,7 +44,8 @@ if (usStates.length !== 51) throw new Error(`expected 51 states + DC, found ${us
 const polysOf = (f) => f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
 
 // ---- Albers USA (the same numbers as d3-geo's albersUsa, reimplemented) ----
-const W = 960, H = 600, K = 1070, TX = W / 2, TY = H / 2 - 20; // the lower 48 sit 20px above centre; the insets pack into the bottom-left corner
+const W = 960, H = 640, K = 1070, TX = W / 2, TY = 280; // the lower 48 sit where they did in the 960×600 frame (TY stayed 280 when the
+// frame grew 40px at the bottom on 2026-10-13 for Cancún, which projects to y≈599, below Miami); the insets pack into the bottom-left corner
 const rad = Math.PI / 180;
 function conic(p0, p1) { // conic equal-area raw projection for standard parallels p0, p1 (degrees)
   const sy0 = Math.sin(p0 * rad), n = (sy0 + Math.sin(p1 * rad)) / 2, c = 1 + sy0 * (2 * n - sy0), r0 = Math.sqrt(c) / n;
