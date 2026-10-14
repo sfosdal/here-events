@@ -71,16 +71,20 @@
 
 <figure class="map">
   <div class="map-stage">
-    <svg id="usMap" role="img" aria-labelledby="mapTitle" preserveAspectRatio="xMidYMid meet"><title id="mapTitle">The covered cities on a map of the United States — zoom with the wheel, a pinch or the buttons, drag to pan</title></svg>
+    <svg id="usMap" role="img" aria-labelledby="mapTitle" preserveAspectRatio="xMidYMid meet"><title id="mapTitle">The covered cities on a map of the United States — zoom with the wheel, a pinch or the buttons, drag to pan; the crosshair zooms to where you are</title></svg>
     <div class="zoom" role="group" aria-label="Zoom the map">
       <button type="button" id="zoomIn" title="Zoom in (+)" aria-label="Zoom in">+</button>
       <button type="button" id="zoomOut" title="Zoom out (−)" aria-label="Zoom out" disabled>−</button>
       <button type="button" id="zoomReset" title="The whole country (0)" aria-label="Show the whole country" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V5a2 2 0 0 1 2-2h4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M9 21H5a2 2 0 0 1-2-2v-4"/></svg>
       </button>
+      <!-- zoom to the reader's own location and light the nearest city (Steve, 2026-10-14: "add a zoom to my location thingy") -->
+      <button type="button" id="zoomLocate" title="Zoom to my location" aria-label="Zoom to my location and show the nearest city">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      </button>
     </div>
   </div>
-  <figcaption><span class="key"><i class="sw live"></i> live</span> <span class="key"><i class="sw soon"></i> coming soon</span> <span id="count" class="count"></span></figcaption>
+  <figcaption><span class="key"><i class="sw live"></i> live</span> <span class="key"><i class="sw soon"></i> coming soon</span> <span id="near" class="near" hidden></span> <span id="count" class="count"></span></figcaption>
 </figure>
 </div>
 
@@ -88,6 +92,7 @@
   <section class="cities" aria-labelledby="citiesH">
     <h2 id="citiesH">The cities</h2>
     <ul id="cityList" class="city-list"><li>Loading…</li></ul>
+    <p class="source-note">Map outline, state lines and lakes from <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> (1:50m, and 1:10m once zoomed in), public domain.</p>
   </section>
 </main>
 
@@ -97,7 +102,6 @@
       <svg class="gw-logo" aria-hidden="true"><use href="#gw-mark"/></svg>
       <p class="gw-credit"><strong>Ghostwood Sites</strong></p>
     </a>
-    <p class="foot-note">Map outline and state lines from <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>, 1:50m, public domain.</p>
   </div>
 </footer>
 <script src="map.js"></script>

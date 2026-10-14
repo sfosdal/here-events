@@ -4,7 +4,10 @@
 // must match), lists the cities below the map, and lets the reader zoom and
 // pan (wheel, pinch, drag, the + − buttons, double-click, the keyboard) —
 // Steve, 2026-10-12: "the base maps … should support zooming and boundaries".
-// No libraries.
+// Past 3× the 1:10m layer (us-outline-fine.json) is fetched once and swapped
+// in ("as you zoom in detail should improve", 2026-10-14); a fourth button
+// zooms to the reader's own location and lights the nearest city ("add a zoom
+// to my location thingy", "highlight nearest city"). No libraries.
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
@@ -39,15 +42,25 @@
     var raw = conic(p0, p1), c = raw(center[0] * rad, center[1] * rad);
     return function (lon, lat) { var p = raw((lon + rotLon) * rad, lat * rad); return [tx + scale * (p[0] - c[0]), ty - scale * (p[1] - c[1])]; };
   }
-  function projector(o) { // o: the outline file's width/height/scale/tx/ty and the insets' translations (build-map.mjs packs them bottom-left)
+  // which inset a point belongs to; null when it is on none of the drawn land (a reader in Canada or at sea)
+  function regionOf(lon, lat) {
+    if (lon > 0) lon -= 360;
+    if (lat > 50) return lon < -129 && lon > -190 && lat < 72 ? 'alaska' : null;
+    if (lat < 23 && lon < -140) return lat > 18 && lon > -161 ? 'hawaii' : null;
+    if (lat < 20 && lon > -70 && lon < -64) return lat > 17 ? 'pr' : null;
+    return lat > 24 && lat < 49.5 && lon > -125 && lon < -66 ? 'lower48' : null;
+  }
+  function projector(o) { // o: the outline file's width/height/scale/tx/ty and the insets' scales + translations (build-map.mjs centres each in its box)
     var K = o.scale, I = o.insets;
-    var lower48 = make(29.5, 45.5, 96, [-0.6, 38.7], K, o.tx, o.ty);
-    var alaska = make(55, 65, 154, [-2, 58.5], K * 0.35, I.alaska[0], I.alaska[1]);
-    var hawaii = make(8, 18, 157, [-3, 19.9], K, I.hawaii[0], I.hawaii[1]);
-    var pr = make(17, 19, 66.5, [0, 18.2], K, I.pr[0], I.pr[1]);
+    var P = {
+      lower48: make(29.5, 45.5, 96, [-0.6, 38.7], K, o.tx, o.ty),
+      alaska: make(55, 65, 154, [-2, 58.5], K * I.scale.alaska, I.alaska[0], I.alaska[1]),
+      hawaii: make(8, 18, 157, [-3, 19.9], K * I.scale.hawaii, I.hawaii[0], I.hawaii[1]),
+      pr: make(17, 19, 66.5, [0, 18.2], K * I.scale.pr, I.pr[0], I.pr[1]),
+    };
     return function (lon, lat) {
       if (lon > 0) lon -= 360; // the western Aleutians, past 180°
-      return (lat > 50 ? alaska : lat < 23 && lon < -140 ? hawaii : lat < 20 && lon > -70 && lon < -64 ? pr : lower48)(lon, lat);
+      return P[lat > 50 ? 'alaska' : lat < 23 && lon < -140 ? 'hawaii' : lat < 20 && lon > -70 && lon < -64 ? 'pr' : 'lower48'](lon, lat);
     };
   }
 
@@ -59,6 +72,20 @@
     return e;
   }
   function site(c) { return c.url || 'https://' + c.key + '.here.events/'; }
+  var rectD = function (b) { return 'M' + b.x0 + ' ' + b.y0 + 'H' + b.x1 + 'V' + b.y1 + 'H' + b.x0 + 'Z'; };
+  // the frame's edges fade: four rects over the neighbouring land, each a gradient from the page colour to clear across
+  // `fade` units, so the half-tone land dissolves instead of stopping at a hard line (Steve, 2026-10-14: "there should be no
+  // hard edges to the map"); drawn after the neighbours and before the US land, clipped like the layer they soften. (A
+  // luminance mask did the same and stalled headless Chrome's screenshots, so overlays it is.)
+  function fadeEdges(defs, parent, id, b, fade) {
+    [['l', b.x0, b.y0, fade, b.y1 - b.y0, '0%', '0%', '100%', '0%'], ['r', b.x1 - fade, b.y0, fade, b.y1 - b.y0, '100%', '0%', '0%', '0%'],
+      ['t', b.x0, b.y0, b.x1 - b.x0, fade, '0%', '0%', '0%', '100%'], ['b', b.x0, b.y1 - fade, b.x1 - b.x0, fade, '0%', '100%', '0%', '0%']].forEach(function (q) {
+      var g = el('linearGradient', { id: id + '-' + q[0], x1: q[5], y1: q[6], x2: q[7], y2: q[8] }, defs);
+      el('stop', { offset: '0', 'stop-opacity': '1', 'class': 'fade-stop' }, g);
+      el('stop', { offset: '1', 'stop-opacity': '0', 'class': 'fade-stop' }, g);
+      el('rect', { x: q[1], y: q[2], width: q[3], height: q[4], fill: 'url(#' + id + '-' + q[0] + ')', 'class': 'fade' }, parent);
+    });
+  }
 
   // ---- zoom + pan: the viewBox is the camera. Scale 1 (the whole country) to MAXK; the view never leaves the
   // country's frame. Dots and names keep their screen size (styles.css divides by --k); borders and leaders use
@@ -71,7 +98,8 @@
       kNow = W / view.w;
       svg.setAttribute('viewBox', [view.x, view.y, view.w, view.h].map(function (v) { return v.toFixed(2); }).join(' '));
       svg.style.setProperty('--k', kNow.toFixed(4));
-      var ctm = svg.getScreenCTM(); if (ctm) svg.style.setProperty('--ks', Math.max(1, ctm.a / (1280 / 960)).toFixed(4));
+      var ctm = svg.getScreenCTM();
+      if (ctm) { svg.style.setProperty('--ks', Math.max(1, ctm.a / (1280 / 960)).toFixed(4)); svg.style.setProperty('--ka', Math.max(0.05, ctm.a).toFixed(4)); }
       var zoomed = kNow > 1.02;
       svg.classList.toggle('is-zoomed', zoomed);
       svg.style.touchAction = zoomed ? 'none' : 'pan-y';
@@ -90,6 +118,10 @@
       view.w = nw; view.h = view.h / factor; clamp(); apply();
     }
     function zoomCenter(factor) { zoomAt(factor, view.x + view.w / 2, view.y + view.h / 2); }
+    function zoomTo(ux, uy, k) { // centre the view on a map point at scale k (clamped to the frame)
+      k = Math.min(MAXK, Math.max(1, k));
+      view.w = W / k; view.h = H / k; view.x = ux - view.w / 2; view.y = uy - view.h / 2; clamp(); apply();
+    }
     function reset() { view = { x: 0, y: 0, w: W, h: H }; apply(); }
     zin.addEventListener('click', function () { zoomCenter(1.6); });
     zout.addEventListener('click', function () { zoomCenter(1 / 1.6); });
@@ -145,30 +177,41 @@
     svg.setAttribute('tabindex', '0');
     window.addEventListener('resize', apply);
     apply();
+    return { zoomTo: zoomTo, reset: reset, k: function () { return kNow; } };
   } // a neighbourhood sits under its city (lqa.seattle.here.events, 2026-10-11)
 
+  var haversineMi = function (a, b) {
+    var dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 3958.8 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  };
+
   Promise.all([fetch('us-outline.json').then(function (r) { return r.json(); }), fetch('cities.json').then(function (r) { return r.json(); })]).then(function (res) {
-    var o = res[0], cities = res[1].cities, project = projector(o);
+    var o = res[0], cities = res[1].cities, project = projector(o), W = o.width, H = o.height, boxes = o.insets.boxes;
     var svg = $('usMap');
-    svg.setAttribute('viewBox', '0 0 ' + o.width + ' ' + o.height);
-    // the neighbours at half tone (Canada, Mexico, Cuba, …), under everything: clipped to the frame less the inset box
-    // around the lower 48, and to the inset box around Alaska (Steve, 2026-10-13: "grey them out half compared to US")
-    var box = o.insets.box, defs = el('defs', {}, svg);
-    el('path', { d: 'M0 0H' + o.width + 'V' + o.height + 'H0Z' + 'M' + box.x + ' ' + box.y + 'H' + box.w + 'V' + box.h + 'H' + box.x + 'Z', 'clip-rule': 'evenodd' }, el('clipPath', { id: 'clipMain' }, defs));
-    el('rect', { x: box.x, y: box.y, width: box.w - box.x, height: box.h - box.y }, el('clipPath', { id: 'clipInset' }, defs));
-    var far = el('g', { 'class': 'far' }, svg);
-    [['far', 'clipMain', 'fill'], ['farEdge', 'clipMain', 'edge'], ['farAlaska', 'clipInset', 'fill'], ['farAlaskaEdge', 'clipInset', 'edge']].forEach(function (q) {
-      if (o.paths[q[0]]) el('path', { d: o.paths[q[0]], 'clip-path': 'url(#' + q[1] + ')', 'class': 'far-' + q[2] }, far);
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var frame = { x0: 0, y0: 0, x1: W, y1: H }, defs = el('defs', {}, svg), layer = {};
+    // the neighbours at half tone (Canada, Mexico, Cuba, …), under everything: clipped to the frame less the inset boxes
+    // around the lower 48, and to the Alaska box around Alaska (Steve, 2026-10-13: "grey them out half compared to US"),
+    // each faded at its edges
+    el('path', { d: rectD(frame) + Object.keys(boxes).map(function (k) { return rectD(boxes[k]); }).join(''), 'clip-rule': 'evenodd' }, el('clipPath', { id: 'clipMain' }, defs));
+    el('path', { d: rectD(boxes.alaska) }, el('clipPath', { id: 'clipAlaska' }, defs));
+    var farMain = el('g', { 'class': 'far', 'clip-path': 'url(#clipMain)' }, svg);
+    var farAk = el('g', { 'class': 'far', 'clip-path': 'url(#clipAlaska)' }, svg);
+    [['far', farMain, 'fill'], ['farEdge', farMain, 'edge'], ['farAlaska', farAk, 'fill'], ['farAlaskaEdge', farAk, 'edge']].forEach(function (q) {
+      if (o.paths[q[0]]) layer[q[0]] = el('path', { d: o.paths[q[0]], 'class': 'far-' + q[2] }, q[1]);
     });
+    fadeEdges(defs, farMain, 'fadeFrame', frame, 56);
+    fadeEdges(defs, farAk, 'fadeAlaska', boxes.alaska, 14);
     var land = el('g', { 'class': 'land' }, svg);
-    ['lower48', 'alaska', 'hawaii', 'pr'].forEach(function (k) { if (o.paths[k]) el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });
+    ['lower48', 'alaska', 'hawaii', 'pr'].forEach(function (k) { if (o.paths[k]) layer[k] = el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });
     // the state boundaries: stroke only, over the land, under the dots; the line keeps its width at every zoom
-    if (o.paths.states) el('path', { d: o.paths.states, 'class': 'states', 'vector-effect': 'non-scaling-stroke' }, el('g', { 'class': 'borders' }, svg));
+    if (o.paths.states) layer.states = el('path', { d: o.paths.states, 'class': 'states', 'vector-effect': 'non-scaling-stroke' }, el('g', { 'class': 'borders' }, svg));
     // the big lakes as water over land and borders (the sources count them as land), shoreline stroked
-    if (o.paths.lakes) el('path', { d: o.paths.lakes, 'class': 'lakes', 'vector-effect': 'non-scaling-stroke' }, svg);
-    // a faint frame line between the insets and the mainland, as atlases draw it
-    el('path', { d: 'M' + box.x + ' ' + box.y + 'H' + box.w + 'V' + box.h, 'class': 'inset-line' }, svg);
-    var pins = el('g', { 'class': 'pins' }, svg), placed = [];
+    if (o.paths.lakes) layer.lakes = el('path', { d: o.paths.lakes, 'class': 'lakes', 'vector-effect': 'non-scaling-stroke' }, svg);
+    // a faint dashed box around each inset, as atlases draw them
+    Object.keys(boxes).forEach(function (k) { var b = boxes[k]; el('rect', { x: b.x0, y: b.y0, width: b.x1 - b.x0, height: b.y1 - b.y0, rx: 2, 'class': 'inset-line', 'vector-effect': 'non-scaling-stroke' }, svg); });
+    var pins = el('g', { 'class': 'pins' }, svg), placed = [], pinOf = {};
     cities.forEach(function (c) {
       var p = project(c.lon, c.lat), x = +p[0].toFixed(1), y = +p[1].toFixed(1);
       var a = el('a', { href: site(c), 'class': 'pin' + (c.live ? ' is-live' : ' is-soon'), 'data-key': c.key }, pins);
@@ -182,6 +225,7 @@
       var t = el('text', { x: x + lb.dx, y: y + lb.dy, 'text-anchor': lb.anchor, 'class': 'label' }, a);
       t.textContent = c.name;
       placed.push({ x: x, y: y, dx: lb.dx, dy: lb.dy, text: t, leader: far ? a.firstChild : null });
+      pinOf[c.key] = a;
     });
     // the list under the map: state, city, link
     var ul = $('cityList'); ul.textContent = '';
@@ -198,12 +242,63 @@
     });
     var live = cities.filter(function (c) { return c.live; }).length;
     $('count').textContent = live + ' live, ' + (cities.length - live) + ' on the way';
-    zoomable(svg, o.width, o.height, function (k) { // names and leaders keep their screen offset from the dot
-      var ks = parseFloat(svg.style.getPropertyValue('--ks')) || 1; k = Math.max(k, ks);
+
+    // ---- the fine layer: the 1:10m paths, fetched once the reader zooms past FINE_K and swapped in for the 1:50m ones
+    // (same keys, same frame); back below, the coarse paths return, so a wide view never pays for the detail ----
+    var FINE_K = 3, fine = null, fineLoading = false, showingFine = false;
+    function swap(toFine) {
+      var src = toFine ? fine : o;
+      Object.keys(layer).forEach(function (k) { if (src.paths[k]) layer[k].setAttribute('d', src.paths[k]); });
+      showingFine = toFine; svg.classList.toggle('is-fine', toFine);
+    }
+    function wantFine(k) {
+      if (k >= FINE_K) {
+        if (fine) { if (!showingFine) swap(true); }
+        else if (!fineLoading) {
+          fineLoading = true;
+          fetch('us-outline-fine.json').then(function (r) { return r.json(); }).then(function (f) { fine = f; if (zoom.k() >= FINE_K) swap(true); }).catch(function () { fineLoading = false; });
+        }
+      } else if (showingFine) swap(false);
+    }
+    var zoom = zoomable(svg, W, H, function (k) { // names and leaders keep their screen offset from the dot
+      var ks = parseFloat(svg.style.getPropertyValue('--ks')) || 1, kk = Math.max(k, ks);
       placed.forEach(function (q) {
-        q.text.setAttribute('x', (q.x + q.dx / k).toFixed(1)); q.text.setAttribute('y', (q.y + q.dy / k).toFixed(1));
-        if (q.leader) { q.leader.setAttribute('x2', (q.x + q.dx * 0.8 / k).toFixed(1)); q.leader.setAttribute('y2', (q.y + (q.dy - 4) * 0.8 / k).toFixed(1)); }
+        q.text.setAttribute('x', (q.x + q.dx / kk).toFixed(1)); q.text.setAttribute('y', (q.y + q.dy / kk).toFixed(1));
+        if (q.leader) { q.leader.setAttribute('x2', (q.x + q.dx * 0.8 / kk).toFixed(1)); q.leader.setAttribute('y2', (q.y + (q.dy - 4) * 0.8 / kk).toFixed(1)); }
       });
+      wantFine(k);
+    });
+
+    // ---- "zoom to my location": the browser's position, projected like a city; the view centres there at 4×, a pulsing
+    // marker shows the spot and the nearest live city lights up, named in the caption with the distance ----
+    var locate = $('zoomLocate'), near = $('near'), you = null;
+    function say(msg) { near.textContent = msg; near.hidden = !msg; }
+    function showYou(lon, lat) {
+      var reg = regionOf(lon, lat);
+      if (!reg) { say('You are outside the map'); return; }
+      var p = project(lon, lat), x = +p[0].toFixed(1), y = +p[1].toFixed(1);
+      if (!you) you = el('g', { 'class': 'you' }, svg);
+      you.textContent = '';
+      el('circle', { cx: x, cy: y, r: 6, 'class': 'you-pulse' }, you);
+      el('circle', { cx: x, cy: y, r: 5, 'class': 'you-dot' }, you);
+      var best = null, bestD = Infinity;
+      cities.forEach(function (c) { if (!c.live) return; var d = haversineMi({ lat: lat, lon: lon }, c); if (d < bestD) { bestD = d; best = c; } });
+      Object.keys(pinOf).forEach(function (k) { pinOf[k].classList.toggle('is-nearest', best && k === best.key); });
+      if (best) {
+        var a = pinOf[best.key]; a.parentNode.appendChild(a); // on top of its neighbours
+        say('Nearest: ' + best.name + ', ' + Math.round(bestD).toLocaleString() + ' mi');
+      } else say('');
+      zoom.zoomTo(x, y, reg === 'lower48' ? 4 : 3);
+    }
+    if (!('geolocation' in navigator)) locate.hidden = true;
+    locate.addEventListener('click', function () {
+      locate.disabled = true; say('Finding you…');
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        locate.disabled = false; showYou(pos.coords.longitude, pos.coords.latitude);
+      }, function (err) {
+        locate.disabled = false;
+        say(err.code === 1 ? 'Location not shared' : 'Location unavailable');
+      }, { timeout: 12000, maximumAge: 300000 });
     });
   }).catch(function (e) { $('count').textContent = 'The map could not load (' + e.message + ').'; });
 })();

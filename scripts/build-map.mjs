@@ -1,18 +1,24 @@
-// Builds site/us-outline.json: the United States outline (lower 48, with
-// Alaska, Hawaii and Puerto Rico as insets packed into the bottom-left corner),
-// the state boundaries, the big lakes, and the neighbouring land (Canada,
-// Mexico, Cuba, the Bahamas, whatever falls inside the frame) at half tone,
-// projected Albers-USA style from Natural Earth's 1:50m files (public domain;
-// 1:50m since 2026-10-12 so the map survives zooming — Steve: "the base maps
-// at here.events should support zooming and boundaries"; neighbours + Puerto
-// Rico + the insets bottom-left, Steve 2026-10-13: "show canada and mexico,
-// cube, etc, anything that would fit into the map but grey them out half
-// compared to US; include puetro rico too", "this should be bottom left
-// justified").
+// Builds site/us-outline.json (Natural Earth 1:50m) and site/us-outline-fine.json
+// (1:10m, fetched by map.js once the reader zooms past 3× — Steve, 2026-10-14:
+// "as you zoom in detail should improve"): the United States outline (lower 48,
+// with Alaska, Hawaii and Puerto Rico as insets), the state boundaries, the big
+// lakes, and the neighbouring land (Canada, Mexico, Cuba, the Bahamas, whatever
+// falls inside the frame) at half tone, projected Albers-USA style.
+// The frame is 1280×640 since 2026-10-14: the lower 48 sit right of centre and
+// the Alaska and Hawaii boxes stack in the empty column at the left, under the
+// masthead text, beside the Pacific Northwest (Steve: "both boxes should be in
+// this area"); Puerto Rico, at 1.5×, floats in the open Atlantic east of the
+// Carolinas ("put it here"). Before that (2026-10-13) the three insets packed
+// into the bottom-left corner of a 960×640 frame.
+// History: 1:50m since 2026-10-12 so the map survives zooming ("the base maps
+// at here.events should support zooming and boundaries"); neighbours + Puerto
+// Rico, Steve 2026-10-13: "show canada and mexico, cube, etc, anything that
+// would fit into the map but grey them out half compared to US; include puetro
+// rico too".
 // Run: node scripts/build-map.mjs
 // The projection maths is written out here and again in site/map.js, which
-// places the city dots with the same function; the inset translations and the
-// inset box are computed here and read by map.js from the JSON (`insets`), so
+// places the city dots with the same function; the inset scales, translations
+// and boxes are computed here and read by map.js from the JSON (`insets`), so
 // only the conic constants are duplicated.
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -31,21 +37,11 @@ async function load(name) {
   }
   return JSON.parse(readFileSync(src, 'utf8'));
 }
-const countries = await load('ne_50m_admin_0_countries');
-const states = await load('ne_50m_admin_1_states_provinces');
-const lakes = await load('ne_50m_lakes');
 const adminOf = (f) => f.properties.ADMIN || f.properties.NAME;
-const us = countries.features.find((f) => adminOf(f) === 'United States of America');
-if (!us) throw new Error('United States not found in the countries file');
-const pr = countries.features.find((f) => adminOf(f) === 'Puerto Rico');
-if (!pr) throw new Error('Puerto Rico not found in the countries file');
-const usStates = states.features.filter((f) => f.properties.adm0_a3 === 'USA' || f.properties.iso_a2 === 'US');
-if (usStates.length !== 51) throw new Error(`expected 51 states + DC, found ${usStates.length}`);
 const polysOf = (f) => f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
 
 // ---- Albers USA (the same numbers as d3-geo's albersUsa, reimplemented) ----
-const W = 960, H = 640, K = 1070, TX = W / 2, TY = 280; // the lower 48 sit where they did in the 960×600 frame (TY stayed 280 when the
-// frame grew 40px at the bottom on 2026-10-13 for Cancún, which projects to y≈599, below Miami); the insets pack into the bottom-left corner
+const W = 1280, H = 640, K = 1070, TX = 680, TY = 280; // TY as in the 960-wide frames; TX = the old 480 + 200, so the lower 48 moved right by the width of the left column
 const rad = Math.PI / 180;
 function conic(p0, p1) { // conic equal-area raw projection for standard parallels p0, p1 (degrees)
   const sy0 = Math.sin(p0 * rad), n = (sy0 + Math.sin(p1 * rad)) / 2, c = 1 + sy0 * (2 * n - sy0), r0 = Math.sqrt(c) / n;
@@ -60,66 +56,82 @@ function make(p0, p1, rotLon, center, scale, tx, ty) {
 // to the far side of the cone and the islands landed in the Pacific off California (Steve, 2026-10-13: "what are these") —
 // every longitude is normalised to the western hemisphere's continuation first
 const west = (lon) => lon > 0 ? lon - 360 : lon;
+const SCALE = { alaska: 0.35, hawaii: 1.6, pr: 1.5 }; // of K; d3's albersUsa uses 0.35 / 1 / —, Hawaii and Puerto Rico are shown larger so their pins have room
 const lower48 = make(29.5, 45.5, 96, [-0.6, 38.7], K, TX, TY);
-const alaska0 = make(55, 65, 154, [-2, 58.5], K * 0.35, 0, 0);
-const hawaii0 = make(8, 18, 157, [-3, 19.9], K, 0, 0);
-const pr0 = make(17, 19, 66.5, [0, 18.2], K, 0, 0);
+const alaska0 = make(55, 65, 154, [-2, 58.5], K * SCALE.alaska, 0, 0);
+const hawaii0 = make(8, 18, 157, [-3, 19.9], K * SCALE.hawaii, 0, 0);
+const pr0 = make(17, 19, 66.5, [0, 18.2], K * SCALE.pr, 0, 0);
 const region = (lon, lat) => lat > 50 ? 'alaska' : lat < 23 && lon < -140 ? 'hawaii' : lat < 20 && lon > -70 && lon < -64 ? 'pr' : 'lower48';
 
-// ---- the insets, bottom-left justified: each is projected at origin, measured, then translated so it sits on the frame's
-// bottom edge, Alaska against the left edge, Hawaii and Puerto Rico in a row beside it; the inset box is the dashed L ----
-const PAD = 10, GAP = 14, BOTTOM = H - PAD; // the box must stop short of Texas (its Rio Grande corner sits at x≈417)
+// ---- the inset boxes (map units): Alaska over Hawaii in the left column, Puerto Rico in the Atlantic. Each inset is
+// projected at the origin, measured, then translated to the centre of its box; the boxes are drawn dashed by map.js. ----
+const BOX = {
+  alaska: { x0: 10, y0: 30, x1: 250, y1: 180 },
+  hawaii: { x0: 10, y0: 200, x1: 250, y1: 320 },
+  pr: { x0: 1060, y0: 310, x1: 1156, y1: 354 },
+};
 function bbox(polys, proj) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const poly of polys) for (const ring of poly) for (const [lon, lat] of ring) { const [x, y] = proj(west(lon), lat); if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
   return { x0, y0, x1, y1 };
 }
-const usPolys = polysOf(us);
-const ringsIn = (polys, reg) => polys.filter((poly) => region(poly[0][0][0], poly[0][0][1]) === reg);
-const akBox = bbox(ringsIn(usPolys, 'alaska'), alaska0);
-const akT = [PAD - akBox.x0, BOTTOM - akBox.y1];
-const hiBox = bbox(ringsIn(usPolys, 'hawaii'), hawaii0);
-const hiT = [akBox.x1 + akT[0] + GAP - hiBox.x0, BOTTOM - hiBox.y1];
-const prBox = bbox(polysOf(pr), pr0);
-const prT = [hiBox.x1 + hiT[0] + GAP + 4 - prBox.x0, BOTTOM - prBox.y1];
 const r1 = (v) => +v.toFixed(1);
-const insets = {
-  alaska: akT.map(r1), hawaii: hiT.map(r1), pr: prT.map(r1),
-  box: { x: 0, y: r1(akBox.y0 + akT[1] - 14), w: r1(prBox.x1 + prT[0] + 8), h: H }, // the dashed L runs along y and down x
-};
+const centreIn = (bb, box) => [r1((box.x0 + box.x1) / 2 - (bb.x0 + bb.x1) / 2), r1((box.y0 + box.y1) / 2 - (bb.y0 + bb.y1) / 2)];
+const inside = (p, b) => p[0] > b.x0 && p[0] < b.x1 && p[1] > b.y0 && p[1] < b.y1;
+
+// the 1:50m files fix the inset translations (so the fine layer and the coarse one share them exactly), measured from the US
+// and Puerto Rico outlines
+const coarse = { countries: await load('ne_50m_admin_0_countries'), states: await load('ne_50m_admin_1_states_provinces'), lakes: await load('ne_50m_lakes') };
+const fine = { countries: await load('ne_10m_admin_0_countries'), states: await load('ne_10m_admin_1_states_provinces'), lakes: await load('ne_10m_lakes') };
+function usOf(countries) {
+  const us = countries.features.find((f) => adminOf(f) === 'United States of America');
+  if (!us) throw new Error('United States not found in the countries file');
+  const pr = countries.features.find((f) => adminOf(f) === 'Puerto Rico');
+  if (!pr) throw new Error('Puerto Rico not found in the countries file');
+  return { us, pr };
+}
+const ringsIn = (polys, reg) => polys.filter((poly) => region(poly[0][0][0], poly[0][0][1]) === reg);
+{
+  var { us: us50, pr: pr50 } = usOf(coarse.countries);
+}
+const usPolys50 = polysOf(us50);
+const akBox = bbox(ringsIn(usPolys50, 'alaska'), alaska0), hiBox = bbox(ringsIn(usPolys50, 'hawaii'), hawaii0), prBox = bbox(polysOf(pr50), pr0);
+const akT = centreIn(akBox, BOX.alaska), hiT = centreIn(hiBox, BOX.hawaii), prT = centreIn(prBox, BOX.pr);
+for (const [name, bb, t, box] of [['alaska', akBox, akT, BOX.alaska], ['hawaii', hiBox, hiT, BOX.hawaii], ['pr', prBox, prT, BOX.pr]]) {
+  const m = Math.min(bb.x0 + t[0] - box.x0, box.x1 - bb.x1 - t[0], bb.y0 + t[1] - box.y0, box.y1 - bb.y1 - t[1]);
+  if (m < 6) throw new Error(`${name} inset does not fit its box with a margin (${m.toFixed(1)} units) — grow the box or shrink SCALE.${name}`);
+}
+const insets = { scale: SCALE, alaska: akT, hawaii: hiT, pr: prT, boxes: BOX };
 const alaska = (lon, lat) => { const p = alaska0(west(lon), lat); return [p[0] + akT[0], p[1] + akT[1]]; };
 const hawaii = (lon, lat) => { const p = hawaii0(lon, lat); return [p[0] + hiT[0], p[1] + hiT[1]]; };
 const prico = (lon, lat) => { const p = pr0(lon, lat); return [p[0] + prT[0], p[1] + prT[1]]; };
 const PROJ = { lower48, alaska, hawaii, pr: prico };
 export function project(lon, lat) { return PROJ[region(lon, lat)](lon, lat); }
-
-// ---- the outline: one path per region, rings joined ----
-const toPath = (pts) => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('') + 'Z';
-function ringPath(ring, reg) {
-  reg = reg || region(ring[0][0], ring[0][1]);
-  return { reg, d: toPath(ring.map(([lon, lat]) => PROJ[reg](lon, lat))) };
+// the mainland must stay clear of every box (checked on the 1:50m outline, every point)
+for (const poly of ringsIn(usPolys50, 'lower48')) for (const ring of poly) for (const [lon, lat] of ring) {
+  const p = lower48(lon, lat);
+  for (const [name, box] of Object.entries(BOX)) if (inside(p, box)) throw new Error(`the lower 48 run into the ${name} box at ${p.map((v) => v.toFixed(0))} — move the box`);
 }
-const paths = { lower48: [], alaska: [], hawaii: [], pr: [] };
-for (const poly of usPolys) for (const ring of poly) { const r = ringPath(ring); paths[r.reg].push(r.d); }
-for (const poly of polysOf(pr)) for (const ring of poly) paths.pr.push(ringPath(ring, 'pr').d);
-// ---- the state boundaries: one stroke-only path, every state's rings; shared borders are drawn twice, which a thin line hides ----
-const stateRings = [];
-for (const f of usStates) for (const poly of polysOf(f)) for (const ring of poly) stateRings.push(ringPath(ring).d);
-// ---- the big lakes: Natural Earth's countries and states carry the Great Lakes as land (the border runs mid-lake), so the
-// map drew Lake Michigan as Michigan (Steve, 2026-10-13: "the great lakes are missing boundaries, they look bad") — the lakes
-// are drawn as water over the land and the borders, shoreline stroked, from the 1:50m lakes file, the ones an atlas shows at this size
-const BIG_LAKES = new Set(['Lake Superior', 'Lake Michigan', 'Lake Huron', 'Lake Erie', 'Lake Ontario', 'Lake Saint Clair', 'Great Salt Lake', 'Lake Okeechobee']);
-const lakeRings = [];
-for (const f of lakes.features) {
-  if (!BIG_LAKES.has(f.properties.name)) continue;
-  for (const poly of polysOf(f)) for (const ring of poly) lakeRings.push(ringPath(ring).d);
-}
-if (lakeRings.length < BIG_LAKES.size) throw new Error(`expected ${BIG_LAKES.size} lakes, found ${lakeRings.length} rings`);
 
-// ---- the neighbours: every other country's rings, clipped first in degrees to the window each projection draws sanely
-// (a conic projection throws far-away land anywhere, so the clip comes before the projection), then by the frame in
-// map.js. Two layers: around the lower 48 (everything from Canada to Panama and the Caribbean), and inside the Alaska
-// inset (Yukon, British Columbia, Chukotka) so the inset reads as a place, not a cut-out. ----
+// ---- degree windows for the neighbours, and the frames the projected land is clipped to ----
+const FAR48 = { x0: -175, x1: -35, y0: 3, y1: 78 }, FARAK = { x0: -215, x1: -60, y0: 30, y1: 84 };
+const FRAME = { x0: -4, x1: W + 4, y0: -4, y1: H + 4 };
+const BOXR = { x0: BOX.alaska.x0 - 4, x1: BOX.alaska.x1 + 4, y0: BOX.alaska.y0 - 4, y1: BOX.alaska.y1 + 4 };
+// the degree window's four edges must project OUTSIDE the box they feed: a seam that crossed inside drew as a band over the
+// Alaska inset (a parallel sags at the sides of a conic; lat 78° dipped to y≈506 at Hudson Bay). Checked, not assumed.
+function assertOutside(win, proj, box, label) {
+  const edges = [];
+  for (let t = 0; t <= 1; t += 0.002) {
+    edges.push([win.x0, win.y0 + (win.y1 - win.y0) * t], [win.x1, win.y0 + (win.y1 - win.y0) * t], [win.x0 + (win.x1 - win.x0) * t, win.y0], [win.x0 + (win.x1 - win.x0) * t, win.y1]);
+  }
+  for (const [lon, lat] of edges) {
+    const [x, y] = proj(lon, lat);
+    if (x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1) throw new Error(`${label}: the window edge at ${lon.toFixed(1)},${lat.toFixed(1)} projects inside the box (${x.toFixed(0)},${y.toFixed(0)}) — widen the window`);
+  }
+}
+assertOutside(FAR48, lower48, FRAME, 'FAR48');
+assertOutside(FARAK, alaska, BOXR, 'FARAK');
+
 function clipRing(ring, b) { // Sutherland–Hodgman against [x0,x1]×[y0,y1] in degrees
   const edges = [[0, b.x0, 1], [0, b.x1, -1], [1, b.y0, 1], [1, b.y1, -1]];
   let out = ring;
@@ -148,28 +160,12 @@ function clipRing(ring, b) { // Sutherland–Hodgman against [x0,x1]×[y0,y1] in
   }
   return dense;
 }
-const FAR48 = { x0: -170, x1: -50, y0: 5, y1: 75 }, FARAK = { x0: -215, x1: -60, y0: 30, y1: 84 };
-const FRAME = { x0: -4, x1: W + 4, y0: -4, y1: H + 4 }, BOXR = { x0: -4, x1: insets.box.w + 4, y0: insets.box.y - 4, y1: H + 4 };
-// the degree window's four edges must project OUTSIDE the box they feed: a seam that crossed inside drew as a band over the
-// Alaska inset (a parallel sags at the sides of a conic; lat 78° dipped to y≈506 at Hudson Bay). Checked, not assumed.
-function assertOutside(win, proj, box, label) {
-  const edges = [];
-  for (let t = 0; t <= 1; t += 0.002) {
-    edges.push([win.x0, win.y0 + (win.y1 - win.y0) * t], [win.x1, win.y0 + (win.y1 - win.y0) * t], [win.x0 + (win.x1 - win.x0) * t, win.y0], [win.x0 + (win.x1 - win.x0) * t, win.y1]);
-  }
-  for (const [lon, lat] of edges) {
-    const [x, y] = proj(lon, lat);
-    if (x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1) throw new Error(`${label}: the window edge at ${lon.toFixed(1)},${lat.toFixed(1)} projects inside the box (${x.toFixed(0)},${y.toFixed(0)}) — widen the window`);
-  }
-}
-assertOutside(FAR48, lower48, FRAME, 'FAR48');
-assertOutside(FARAK, alaska, BOXR, 'FARAK');
 // Sutherland–Hodgman joins the pieces of a clipped ring with zero-width seams along the window's edges — right as a FILL
 // (no area, nothing drawn) but wrong as a STROKE (a seam across Hudson Bay drew as a stripe over the Alaska inset), so the
 // coastline is a second, open path: every run of consecutive points inside the window, never closed, never bridged.
-function runs(ring, b, proj, frame) {
+function runs(ring, b, proj, frame, eps) {
   const out = []; let run = [];
-  const flush = () => { if (run.length > 1) out.push(run.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('')); run = []; };
+  const flush = () => { const t = thin(run, eps); if (t.length > 1) out.push(t.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('')); run = []; };
   for (const [lon, lat] of ring) {
     const q = lon >= b.x0 && lon <= b.x1 && lat >= b.y0 && lat <= b.y1 ? proj(lon, lat) : null;
     if (q && q[0] >= frame.x0 && q[0] <= frame.x1 && q[1] >= frame.y0 && q[1] <= frame.y1) run.push(q); else flush();
@@ -177,25 +173,88 @@ function runs(ring, b, proj, frame) {
   flush();
   return out;
 }
-const far = [], farAlaska = [], farEdge = [], farAlaskaEdge = [];
-for (const f of countries.features) {
-  const name = adminOf(f);
-  if (name === 'United States of America' || name === 'Puerto Rico') continue;
-  for (const poly of polysOf(f)) for (const ring of poly) {
-    const w = ring.map(([lon, lat]) => [west(lon), lat]);
-    // then clipped again in map units to the frame (and the inset box), so the file carries no land that is never drawn
-    const a = clipRing(ring, FAR48), pa = a && clipRing(a.map(([lon, lat]) => lower48(lon, lat)), FRAME); if (pa) far.push(toPath(pa));
-    const b = clipRing(w, FARAK), pb = b && clipRing(b.map(([lon, lat]) => alaska(lon, lat)), BOXR); if (pb) farAlaska.push(toPath(pb));
-    farEdge.push(...runs(ring, FAR48, lower48, FRAME));
-    farAlaskaEdge.push(...runs(w, FARAK, alaska, BOXR));
-  }
+// thinning: a point closer than eps map units to the last kept one is dropped (the 1:10m files carry detail no zoom shows;
+// at 8×, the deepest zoom, 0.15 units is about a screen pixel); eps 0 keeps every point
+function thin(pts, eps) {
+  if (!eps || pts.length < 3) return pts;
+  const out = [pts[0]]; let last = pts[0];
+  for (let i = 1; i < pts.length; i++) { const p = pts[i]; if (Math.hypot(p[0] - last[0], p[1] - last[1]) >= eps) { out.push(p); last = p; } }
+  return out;
 }
-const out = {
-  _: 'United States outline from Natural Earth 1:50m admin-0 countries, state boundaries from 1:50m admin-1 states and the big lakes from 1:50m lakes (public domain), projected Albers USA (conic equal-area 29.5°/45.5° for the lower 48; Alaska 55°/65° at 0.35 scale, Hawaii 8°/18° and Puerto Rico 17°/19° as insets packed into the bottom-left corner, `insets` holds their translations and the inset box). `far` is the neighbouring land around the lower 48 and `farAlaska` the land around Alaska (fills; `farEdge` / `farAlaskaEdge` their coastlines as open strokes), both drawn at half tone and clipped to the frame. Built by scripts/build-map.mjs; map.js re-implements the projection to place cities.',
-  width: W, height: H, scale: K, tx: TX, ty: TY, insets,
-  paths: { lower48: paths.lower48.join(''), alaska: paths.alaska.join(''), hawaii: paths.hawaii.join(''), pr: paths.pr.join(''), states: stateRings.join(''), lakes: lakeRings.join(''), far: far.join(''), farAlaska: farAlaska.join(''), farEdge: farEdge.join(''), farAlaskaEdge: farAlaskaEdge.join('') },
-};
-writeFileSync(join(here, '..', 'site', 'us-outline.json'), JSON.stringify(out));
-console.log(`us-outline.json: lower48 ${paths.lower48.length} rings, alaska ${paths.alaska.length}, hawaii ${paths.hawaii.length}, pr ${paths.pr.length}, ${stateRings.length} state rings, ${lakeRings.length} lake rings, ${far.length} + ${farAlaska.length} neighbour rings; ${JSON.stringify(out).length} bytes`);
-console.log('insets', JSON.stringify(insets), '\nalaska box', JSON.stringify(Object.fromEntries(Object.entries(akBox).map(([k, v]) => [k, r1(v + (k[0] === 'x' ? akT[0] : akT[1]))]))));
-console.log('Seattle →', project(-122.335, 47.608).map((x) => x.toFixed(1)).join(','), ' Honolulu →', project(-157.858, 21.307).map((x) => x.toFixed(1)).join(','), ' Anchorage →', project(-149.9, 61.2).map((x) => x.toFixed(1)).join(','), ' San Juan →', project(-66.1, 18.47).map((x) => x.toFixed(1)).join(','), ' Attu →', project(173.2, 52.9).map((x) => x.toFixed(1)).join(','));
+const toPath = (pts) => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('') + 'Z';
+const lakeName = (n) => (n || '').replace(/\bSt\.\s*/g, 'Saint ');
+// Natural Earth's countries and states carry the Great Lakes as land (the border runs mid-lake), so the map drew Lake
+// Michigan as Michigan (Steve, 2026-10-13: "the great lakes are missing boundaries, they look bad") — the lakes are drawn
+// as water over the land and the borders, shoreline stroked, the ones an atlas shows at this size
+const BIG_LAKES = new Set(['Lake Superior', 'Lake Michigan', 'Lake Huron', 'Lake Erie', 'Lake Ontario', 'Lake Saint Clair', 'Great Salt Lake', 'Lake Okeechobee']);
+
+// ---- one layer: the US rings per region, the state rings, the lakes, the neighbours; opts.eps thins, opts.speck drops rings
+// whose projected extent is under that many units in both directions (the 1:10m file's rocks and sandbars) ----
+function buildLayer({ countries, states, lakes }, opts, label) {
+  const { us, pr } = usOf(countries);
+  const usStates = states.features.filter((f) => f.properties.adm0_a3 === 'USA' || f.properties.iso_a2 === 'US');
+  if (usStates.length !== 51) throw new Error(`${label}: expected 51 states + DC, found ${usStates.length}`);
+  let dropped = 0;
+  function ringPath(ring, reg) { // null when the ring is a speck or thins to nothing
+    reg = reg || region(ring[0][0], ring[0][1]);
+    const pts = thin(ring.map(([lon, lat]) => PROJ[reg](lon, lat)), opts.eps);
+    if (pts.length < 3) { dropped++; return null; }
+    if (opts.speck) {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const [x, y] of pts) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      if (x1 - x0 < opts.speck && y1 - y0 < opts.speck) { dropped++; return null; }
+    }
+    return { reg, d: toPath(pts) };
+  }
+  const paths = { lower48: [], alaska: [], hawaii: [], pr: [] };
+  for (const poly of polysOf(us)) for (const ring of poly) { const r = ringPath(ring); if (r) paths[r.reg].push(r.d); }
+  for (const poly of polysOf(pr)) for (const ring of poly) { const r = ringPath(ring, 'pr'); if (r) paths.pr.push(r.d); }
+  // the state boundaries: one stroke-only path, every state's rings; shared borders are drawn twice, which a thin line hides
+  const stateRings = [];
+  for (const f of usStates) for (const poly of polysOf(f)) for (const ring of poly) { const r = ringPath(ring); if (r) stateRings.push(r.d); }
+  const lakeRings = []; const found = new Set();
+  for (const f of lakes.features) {
+    const name = lakeName(f.properties.name);
+    if (!BIG_LAKES.has(name)) continue;
+    found.add(name);
+    for (const poly of polysOf(f)) for (const ring of poly) { const r = ringPath(ring); if (r) lakeRings.push(r.d); }
+  }
+  if (found.size < BIG_LAKES.size) {
+    const missing = [...BIG_LAKES].filter((n) => !found.has(n));
+    if (opts.strictLakes) throw new Error(`${label}: lakes missing: ${missing.join(', ')}`);
+    console.warn(`${label}: lakes not in this file: ${missing.join(', ')}`);
+  }
+  // the neighbours: every other country's rings, clipped first in degrees to the window each projection draws sanely (a
+  // conic projection throws far-away land anywhere, so the clip comes before the projection), then by the frame in map
+  // units, so the file carries no land that is never drawn. Two layers: around the lower 48 (everything from Canada to Panama
+  // and the Caribbean), and inside the Alaska box (Yukon, British Columbia, Chukotka) so the inset reads as a place.
+  const far = [], farAlaska = [], farEdge = [], farAlaskaEdge = [];
+  for (const f of countries.features) {
+    const name = adminOf(f);
+    if (name === 'United States of America' || name === 'Puerto Rico') continue;
+    for (const poly of polysOf(f)) for (const ring of poly) {
+      const w = ring.map(([lon, lat]) => [west(lon), lat]);
+      const a = clipRing(ring, FAR48), pa = a && clipRing(a.map(([lon, lat]) => lower48(lon, lat)), FRAME);
+      if (pa) { const t = thin(pa, opts.eps); if (t.length > 2) far.push(toPath(t)); }
+      const b = clipRing(w, FARAK), pb = b && clipRing(b.map(([lon, lat]) => alaska(lon, lat)), BOXR);
+      if (pb) { const t = thin(pb, opts.eps); if (t.length > 2) farAlaska.push(toPath(t)); }
+      farEdge.push(...runs(ring, FAR48, lower48, FRAME, opts.eps));
+      farAlaskaEdge.push(...runs(w, FARAK, alaska, BOXR, opts.eps));
+    }
+  }
+  const out = {
+    paths: { lower48: paths.lower48.join(''), alaska: paths.alaska.join(''), hawaii: paths.hawaii.join(''), pr: paths.pr.join(''), states: stateRings.join(''), lakes: lakeRings.join(''), far: far.join(''), farAlaska: farAlaska.join(''), farEdge: farEdge.join(''), farAlaskaEdge: farAlaskaEdge.join('') },
+  };
+  console.log(`${label}: lower48 ${paths.lower48.length} rings, alaska ${paths.alaska.length}, hawaii ${paths.hawaii.length}, pr ${paths.pr.length}, ${stateRings.length} state rings, ${lakeRings.length} lake rings, ${far.length} + ${farAlaska.length} neighbour rings, ${dropped} rings dropped as specks; ${JSON.stringify(out).length} bytes`);
+  return out;
+}
+
+const NOTE = 'United States outline from Natural Earth admin-0 countries, state boundaries from admin-1 states and the big lakes from the lakes file (public domain), projected Albers USA (conic equal-area 29.5°/45.5° for the lower 48; Alaska 55°/65°, Hawaii 8°/18° and Puerto Rico 17°/19° as insets — `insets` holds their scales (of `scale`), translations and the boxes they sit in: Alaska over Hawaii in the left column, Puerto Rico in the Atlantic). `far` is the neighbouring land around the lower 48 and `farAlaska` the land around Alaska (fills; `farEdge` / `farAlaskaEdge` their coastlines as open strokes), both drawn at half tone, clipped to the frame and faded at its edges. Built by scripts/build-map.mjs; map.js re-implements the projection to place cities.';
+const base = { width: W, height: H, scale: K, tx: TX, ty: TY, insets };
+const c = buildLayer(coarse, { eps: 0, strictLakes: true }, 'us-outline.json (1:50m)');
+writeFileSync(join(here, '..', 'site', 'us-outline.json'), JSON.stringify({ _: NOTE + ' This is the 1:50m layer, drawn first.', ...base, ...c }));
+const f = buildLayer(fine, { eps: 0.15, speck: 0.6 }, 'us-outline-fine.json (1:10m)');
+writeFileSync(join(here, '..', 'site', 'us-outline-fine.json'), JSON.stringify({ _: NOTE + ' This is the 1:10m layer: the same keys and frame, swapped in by map.js past 3× zoom.', ...base, ...f }));
+console.log('insets', JSON.stringify(insets));
+for (const [n, bb, t] of [['alaska', akBox, akT], ['hawaii', hiBox, hiT], ['pr', prBox, prT]]) console.log(n, 'drawn at', [r1(bb.x0 + t[0]), r1(bb.y0 + t[1]), r1(bb.x1 + t[0]), r1(bb.y1 + t[1])].join(','));
+console.log('Seattle →', project(-122.335, 47.608).map((x) => x.toFixed(1)).join(','), ' Honolulu →', project(-157.858, 21.307).map((x) => x.toFixed(1)).join(','), ' Anchorage →', project(-149.9, 61.2).map((x) => x.toFixed(1)).join(','), ' San Juan →', project(-66.1, 18.47).map((x) => x.toFixed(1)).join(','), ' Attu →', project(173.2, 52.9).map((x) => x.toFixed(1)).join(','), ' Hatteras →', project(-75.5, 35.2).map((x) => x.toFixed(1)).join(','), ' Flattery →', project(-124.7, 48.4).map((x) => x.toFixed(1)).join(','));

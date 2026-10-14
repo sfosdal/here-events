@@ -72,6 +72,8 @@ h1 .dot { color: var(--gold); }
 .zoom button[hidden] { display: none; }
 main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .far path { pointer-events: none; vector-effect: non-scaling-stroke; }
+.far .fade { pointer-events: none; }
+.fade-stop { stop-color: var(--sky); } /* the edge fades go to the page colour, whichever theme */
 .far-fill { fill: color-mix(in srgb, var(--land) 50%, var(--sky)); stroke: none; }
 .far-edge { fill: none; stroke: color-mix(in srgb, var(--land-edge) 50%, var(--sky)); stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; }
 .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
@@ -96,12 +98,24 @@ main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .pin .halo { r: calc(7px / var(--k, 1)); }
 .pin .dot { r: calc(4.2px / var(--k, 1)); stroke-width: calc(1.5px / var(--k, 1)); }
 .pin:focus-visible .dot { stroke-width: calc(2.5px / var(--k, 1)); }
+/* the nearest city after "zoom to my location": a gold ring and a gold name */
+.pin.is-nearest .halo { opacity: .5; r: calc(12px / var(--k, 1)); }
+.pin.is-nearest .dot { stroke: var(--ink); stroke-width: calc(2px / var(--k, 1)); }
+.pin.is-nearest .label { fill: var(--gold); }
+/* "you are here": a dot in the ink with a pulsing gold ring, sized in screen pixels at every zoom */
+.you { pointer-events: none; }
+.you .you-dot { fill: var(--ink); stroke: var(--mist); stroke-width: calc(2px / var(--k, 1)); r: calc(5px / var(--k, 1)); }
+.you .you-pulse { fill: none; stroke: var(--gold); stroke-width: calc(2px / var(--k, 1)); animation: you-pulse 1.8s ease-out infinite; }
+@keyframes you-pulse { from { r: calc(6px / var(--k, 1)); opacity: .9; } to { r: calc(26px / var(--k, 1)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .you .you-pulse { animation: none; r: calc(12px / var(--k, 1)); opacity: .6; } }
 .pin .label { font-size: calc(13px / var(--ks, 1)); stroke-width: calc(3px / var(--ks, 1)); }
 figcaption { display: flex; gap: 1.2rem; align-items: center; justify-content: center; margin-top: .4rem; font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
 .key { display: inline-flex; align-items: center; gap: .4rem; }
 .sw { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: var(--gold); }
 .sw.soon { background: var(--ink-soft); opacity: .7; }
 .count { margin-left: auto; }
+.near { color: var(--gold); }
+.near[hidden] { display: none; }
 
 /* ---- the list ---- */
 .cities { margin: 1.8rem 0 2.5rem; }
@@ -115,40 +129,42 @@ figcaption { display: flex; gap: 1.2rem; align-items: center; justify-content: c
 .city-list li.is-soon a { color: var(--ink-soft); font-weight: 500; }
 .city-list li.is-soon .st { color: var(--ink-soft); }
 
-/* ---- footer ---- */
-footer { background: var(--ink); color: var(--sky); }
-:root[data-theme="dark"] footer, :root:not([data-theme="light"]) footer { background: #0e1318; color: var(--ink); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) footer { background: var(--ink); color: var(--sky); } }
-.foot-inner { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; padding: .7rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; white-space: nowrap; }
-.gw { display: flex; align-items: center; gap: .7rem; text-decoration: none; }
-.gw-logo { width: 32px; height: 32px; color: #fff; flex: none; }
-.gw-credit { margin: 0; font-family: var(--mono); font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
-.foot-note { margin: 0; font-size: .72rem; opacity: .75; white-space: normal; text-align: right; }
+/* ---- footer: the city sites' footer (lqa-events styles.css), Steve 2026-10-14: "add ghostwood sites branding like here
+   to the here.events page" — the page's own background under a hairline that warms to the brand orange at the centre and
+   cools to --line at the sides, the lockup (mark + GHOSTWOOD SITES) centred, one link to ghostwoodlabs.com in a new tab ---- */
+footer { position: relative; background: var(--sky); padding: .6rem 1.25rem calc(.6rem + env(safe-area-inset-bottom)); }
+footer::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, var(--line), var(--gold) 50%, var(--line)); }
+.foot-inner { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 1.2rem; white-space: nowrap; }
+a.gw { display: flex; align-items: center; gap: .7rem; text-decoration: none; color: inherit; }
+.gw-logo { width: 32px; height: 32px; color: var(--ink-bright); flex: none; }
+.gw-credit { margin: 0; font-family: var(--mono); font-size: .9rem; letter-spacing: .1em; line-height: 1; text-transform: uppercase; }
+.gw-credit strong { font-weight: 500; color: var(--gold); }
+a.gw:hover .gw-credit strong { color: var(--ink-bright); }
+.source-note { margin: 1.2rem 0 0; font-size: .72rem; color: var(--ink-soft); }
 
 /* ---- narrow screens: the map keeps its dots, drops the always-on names (the list below carries them) ---- */
 @media (max-width: 700px) {
   .fold { display: block; height: auto; min-height: 0; } /* a portrait phone: the map is as wide as the screen and as tall as that makes it */
   .map { margin-top: 1.2rem; display: block; }
-  #usMap { height: auto; aspect-ratio: 960 / 640; }
+  #usMap { height: auto; aspect-ratio: 1280 / 640; }
   .masthead { flex-direction: column; margin-top: 1.4rem; }
   .masthead-tools { order: -1; align-self: flex-end; }
   .pin .label, .pin .leader { display: none; }
   #usMap.is-zoomed .pin .label, #usMap.is-zoomed .pin .leader { display: initial; } /* zoomed in there is room for the names */
-  .pin .dot { r: calc(6px / var(--k, 1)); }
-  .pin .halo { r: calc(11px / var(--k, 1)); }
+  .pin .dot { r: calc(4.5px / var(--ka, 1)); stroke-width: calc(1.2px / var(--ka, 1)); } /* --ka: screen px per map unit, so the dots keep a size on a 1280-unit frame drawn 390 px wide */
+  .pin .halo { r: calc(8px / var(--ka, 1)); }
   figcaption { flex-wrap: wrap; }
   .count { margin-left: 0; width: 100%; text-align: center; }
-  .foot-inner { flex-direction: column; align-items: flex-start; }
-  .foot-note { text-align: left; }
 }
 
 /* ---- ?share: the 1200x630 Open Graph card (scripts/share step; never seen by readers) ---- */
-:root[data-share] body { width: 1200px; height: 630px; overflow: hidden; margin: 0; padding: 0; display: grid; grid-template-columns: 400px 1fr; align-items: center; gap: 0; }
-:root[data-share] .masthead { padding: 0 0 0 56px; margin: 0; display: block; }
-:root[data-share] .masthead h1 { font-size: 72px; line-height: .9; }
-:root[data-share] .masthead .sub { max-width: 300px; font-size: 16px; }
+:root[data-share] body { width: 1200px; height: 630px; overflow: hidden; margin: 0; padding: 0; display: grid; grid-template-columns: 380px 1fr; align-items: center; gap: 0; } /* the text column must clear the map's left column, where the Alaska and Hawaii boxes sit (2026-10-14) */
+:root[data-share] .masthead { padding: 0 0 0 48px; margin: 0; display: block; }
+:root[data-share] .masthead .eyebrow { font-size: 12px; letter-spacing: .1em; }
+:root[data-share] .masthead h1 { font-size: 58px; line-height: .9; }
+:root[data-share] .masthead .sub { max-width: 290px; font-size: 15px; }
 :root[data-share] .theme-toggle, :root[data-share] figcaption, :root[data-share] .cities, :root[data-share] footer, :root[data-share] .zoom { display: none !important; }
 :root[data-share] .fold { display: contents; } /* the masthead and the map are the card's two columns */
 :root[data-share] .map { margin: 0; padding: 0 24px 0 0; display: block; width: auto; }
-:root[data-share] #usMap { height: auto; aspect-ratio: 960 / 640; }
+:root[data-share] #usMap { height: auto; aspect-ratio: 1280 / 640; }
 :root[data-share] .pin .label, :root[data-share] .pin .leader { display: initial; }
