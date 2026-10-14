@@ -190,10 +190,11 @@
     var o = res[0], cities = res[1].cities, project = projector(o), W = o.width, H = o.height, boxes = o.insets.boxes;
     var svg = $('usMap');
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-    var frame = { x0: 0, y0: 0, x1: W, y1: H }, defs = el('defs', {}, svg), layer = {};
+    var bleed = o.bleed || 0, frame = { x0: -bleed, y0: -bleed, x1: W + bleed, y1: H + bleed }, defs = el('defs', {}, svg), layer = {};
     // the neighbours at half tone (Canada, Mexico, Cuba, …), under everything: clipped to the frame less the inset boxes
     // around the lower 48, and to the Alaska box around Alaska (Steve, 2026-10-13: "grey them out half compared to US"),
-    // each faded at its edges
+    // the land around the lower 48 runs `bleed` units past the frame, so a wide screen's letterbox bands show land; the
+    // page fades the map's own edges (styles.css mask on #usMap), the Alaska box fades inside its line
     el('path', { d: rectD(frame) + Object.keys(boxes).map(function (k) { return rectD(boxes[k]); }).join(''), 'clip-rule': 'evenodd' }, el('clipPath', { id: 'clipMain' }, defs));
     el('path', { d: rectD(boxes.alaska) }, el('clipPath', { id: 'clipAlaska' }, defs));
     var farMain = el('g', { 'class': 'far', 'clip-path': 'url(#clipMain)' }, svg);
@@ -201,7 +202,6 @@
     [['far', farMain, 'fill'], ['farEdge', farMain, 'edge'], ['farAlaska', farAk, 'fill'], ['farAlaskaEdge', farAk, 'edge']].forEach(function (q) {
       if (o.paths[q[0]]) layer[q[0]] = el('path', { d: o.paths[q[0]], 'class': 'far-' + q[2] }, q[1]);
     });
-    fadeEdges(defs, farMain, 'fadeFrame', frame, 56);
     fadeEdges(defs, farAk, 'fadeAlaska', boxes.alaska, 14);
     var land = el('g', { 'class': 'land' }, svg);
     ['lower48', 'alaska', 'hawaii', 'pr'].forEach(function (k) { if (o.paths[k]) layer[k] = el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });

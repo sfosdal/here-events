@@ -56,19 +56,22 @@ function make(p0, p1, rotLon, center, scale, tx, ty) {
 // to the far side of the cone and the islands landed in the Pacific off California (Steve, 2026-10-13: "what are these") —
 // every longitude is normalised to the western hemisphere's continuation first
 const west = (lon) => lon > 0 ? lon - 360 : lon;
-const SCALE = { alaska: 0.35, hawaii: 1.6, pr: 1.5 }; // of K; d3's albersUsa uses 0.35 / 1 / —, Hawaii and Puerto Rico are shown larger so their pins have room
+// of K; d3's albersUsa uses 0.35 / 1 / —. These are starting scales: each inset is measured at them and then scaled to fill
+// its box less PAD on every side (Steve, 2026-10-14: "these boxes should be bigger"), the fitted scales go to the JSON
+const SCALE0 = { alaska: 0.35, hawaii: 1.6, pr: 1.5 };
+const PAD = 8;
+const SCALE = { ...SCALE0 };
 const lower48 = make(29.5, 45.5, 96, [-0.6, 38.7], K, TX, TY);
-const alaska0 = make(55, 65, 154, [-2, 58.5], K * SCALE.alaska, 0, 0);
-const hawaii0 = make(8, 18, 157, [-3, 19.9], K * SCALE.hawaii, 0, 0);
-const pr0 = make(17, 19, 66.5, [0, 18.2], K * SCALE.pr, 0, 0);
+const insetProj = (s) => ({ alaska: make(55, 65, 154, [-2, 58.5], K * s.alaska, 0, 0), hawaii: make(8, 18, 157, [-3, 19.9], K * s.hawaii, 0, 0), pr: make(17, 19, 66.5, [0, 18.2], K * s.pr, 0, 0) });
+let { alaska: alaska0, hawaii: hawaii0, pr: pr0 } = insetProj(SCALE0);
 const region = (lon, lat) => lat > 50 ? 'alaska' : lat < 23 && lon < -140 ? 'hawaii' : lat < 20 && lon > -70 && lon < -64 ? 'pr' : 'lower48';
 
 // ---- the inset boxes (map units): Alaska over Hawaii in the left column, Puerto Rico in the Atlantic. Each inset is
 // projected at the origin, measured, then translated to the centre of its box; the boxes are drawn dashed by map.js. ----
-const BOX = {
-  alaska: { x0: 10, y0: 30, x1: 250, y1: 180 },
-  hawaii: { x0: 10, y0: 200, x1: 250, y1: 320 },
-  pr: { x0: 1060, y0: 310, x1: 1156, y1: 354 },
+const BOX = { // the top of the Alaska box clears the page's edge fade (7% of the frame = 45 units on a phone)
+  alaska: { x0: 10, y0: 48, x1: 292, y1: 222 },
+  hawaii: { x0: 10, y0: 238, x1: 292, y1: 392 },
+  pr: { x0: 1036, y0: 296, x1: 1180, y1: 372 },
 };
 function bbox(polys, proj) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -95,11 +98,20 @@ const ringsIn = (polys, reg) => polys.filter((poly) => region(poly[0][0][0], pol
   var { us: us50, pr: pr50 } = usOf(coarse.countries);
 }
 const usPolys50 = polysOf(us50);
+// fit: measure each inset at its starting scale, scale it to fill its box less PAD, then project again at that scale
+{
+  const akB = bbox(ringsIn(usPolys50, 'alaska'), alaska0), hiB = bbox(ringsIn(usPolys50, 'hawaii'), hawaii0), prB = bbox(polysOf(pr50), pr0);
+  const fit = (bb, box) => Math.min((box.x1 - box.x0 - 2 * PAD) / (bb.x1 - bb.x0), (box.y1 - box.y0 - 2 * PAD) / (bb.y1 - bb.y0));
+  SCALE.alaska = +(SCALE0.alaska * fit(akB, BOX.alaska)).toFixed(4);
+  SCALE.hawaii = +(SCALE0.hawaii * fit(hiB, BOX.hawaii)).toFixed(4);
+  SCALE.pr = +(SCALE0.pr * fit(prB, BOX.pr)).toFixed(4);
+  ({ alaska: alaska0, hawaii: hawaii0, pr: pr0 } = insetProj(SCALE));
+}
 const akBox = bbox(ringsIn(usPolys50, 'alaska'), alaska0), hiBox = bbox(ringsIn(usPolys50, 'hawaii'), hawaii0), prBox = bbox(polysOf(pr50), pr0);
 const akT = centreIn(akBox, BOX.alaska), hiT = centreIn(hiBox, BOX.hawaii), prT = centreIn(prBox, BOX.pr);
 for (const [name, bb, t, box] of [['alaska', akBox, akT, BOX.alaska], ['hawaii', hiBox, hiT, BOX.hawaii], ['pr', prBox, prT, BOX.pr]]) {
   const m = Math.min(bb.x0 + t[0] - box.x0, box.x1 - bb.x1 - t[0], bb.y0 + t[1] - box.y0, box.y1 - bb.y1 - t[1]);
-  if (m < 6) throw new Error(`${name} inset does not fit its box with a margin (${m.toFixed(1)} units) — grow the box or shrink SCALE.${name}`);
+  if (m < PAD - 0.5) throw new Error(`${name} inset does not fit its box with a margin (${m.toFixed(1)} units) — the fit went wrong`);
 }
 const insets = { scale: SCALE, alaska: akT, hawaii: hiT, pr: prT, boxes: BOX };
 const alaska = (lon, lat) => { const p = alaska0(west(lon), lat); return [p[0] + akT[0], p[1] + akT[1]]; };
@@ -114,8 +126,12 @@ for (const poly of ringsIn(usPolys50, 'lower48')) for (const ring of poly) for (
 }
 
 // ---- degree windows for the neighbours, and the frames the projected land is clipped to ----
-const FAR48 = { x0: -175, x1: -35, y0: 3, y1: 78 }, FARAK = { x0: -215, x1: -60, y0: 30, y1: 84 };
-const FRAME = { x0: -4, x1: W + 4, y0: -4, y1: H + 4 };
+const FAR48 = { x0: -190, x1: -20, y0: -12, y1: 80 }, FARAK = { x0: -215, x1: -60, y0: 30, y1: 84 };
+// the neighbours are drawn BLEED units past the frame on every side: a wide screen letterboxes the 2:1 frame and the
+// bands beside it show land instead of a hard edge, and the page fades the map's edges (styles.css mask on #usMap)
+// rather than the frame's (Steve, 2026-10-14: "let the fade go all the way to the top and bottom of the screen")
+const BLEED = 200;
+const FRAME = { x0: -BLEED, x1: W + BLEED, y0: -BLEED, y1: H + BLEED };
 const BOXR = { x0: BOX.alaska.x0 - 4, x1: BOX.alaska.x1 + 4, y0: BOX.alaska.y0 - 4, y1: BOX.alaska.y1 + 4 };
 // the degree window's four edges must project OUTSIDE the box they feed: a seam that crossed inside drew as a band over the
 // Alaska inset (a parallel sags at the sides of a conic; lat 78° dipped to y≈506 at Hudson Bay). Checked, not assumed.
@@ -249,8 +265,8 @@ function buildLayer({ countries, states, lakes }, opts, label) {
   return out;
 }
 
-const NOTE = 'United States outline from Natural Earth admin-0 countries, state boundaries from admin-1 states and the big lakes from the lakes file (public domain), projected Albers USA (conic equal-area 29.5°/45.5° for the lower 48; Alaska 55°/65°, Hawaii 8°/18° and Puerto Rico 17°/19° as insets — `insets` holds their scales (of `scale`), translations and the boxes they sit in: Alaska over Hawaii in the left column, Puerto Rico in the Atlantic). `far` is the neighbouring land around the lower 48 and `farAlaska` the land around Alaska (fills; `farEdge` / `farAlaskaEdge` their coastlines as open strokes), both drawn at half tone, clipped to the frame and faded at its edges. Built by scripts/build-map.mjs; map.js re-implements the projection to place cities.';
-const base = { width: W, height: H, scale: K, tx: TX, ty: TY, insets };
+const NOTE = 'United States outline from Natural Earth admin-0 countries, state boundaries from admin-1 states and the big lakes from the lakes file (public domain), projected Albers USA (conic equal-area 29.5°/45.5° for the lower 48; Alaska 55°/65°, Hawaii 8°/18° and Puerto Rico 17°/19° as insets — `insets` holds their scales (of `scale`), translations and the boxes they sit in: Alaska over Hawaii in the left column, Puerto Rico in the Atlantic). `far` is the neighbouring land around the lower 48 and `farAlaska` the land around Alaska (fills; `farEdge` / `farAlaskaEdge` their coastlines as open strokes), both drawn at half tone, `far` clipped to the frame plus `bleed` units on every side (a wide screen letterboxes the frame and the bands show land) — the page fades the map\'s edges, not the frame\'s. Built by scripts/build-map.mjs; map.js re-implements the projection to place cities.';
+const base = { width: W, height: H, scale: K, tx: TX, ty: TY, bleed: BLEED, insets };
 const c = buildLayer(coarse, { eps: 0, strictLakes: true }, 'us-outline.json (1:50m)');
 writeFileSync(join(here, '..', 'site', 'us-outline.json'), JSON.stringify({ _: NOTE + ' This is the 1:50m layer, drawn first.', ...base, ...c }));
 const f = buildLayer(fine, { eps: 0.15, speck: 0.6 }, 'us-outline-fine.json (1:10m)');
