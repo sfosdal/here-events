@@ -217,36 +217,45 @@
     // around the lower 48, and to the Alaska box around Alaska (Steve, 2026-10-13: "grey them out half compared to US"),
     // the land around the lower 48 runs `bleed` units past the frame, so a wide screen's letterbox bands show land; the
     // page fades the map's own edges (styles.css mask on #usMap), the Alaska box fades inside its line
-    el('path', { d: rectD(frame) + Object.keys(boxes).map(function (k) { return rectD(boxes[k]); }).join(''), 'clip-rule': 'evenodd' }, el('clipPath', { id: 'clipMain' }, defs));
+    el('path', { d: rectD(frame) }, el('clipPath', { id: 'clipMain' }, defs));
     el('path', { d: rectD(boxes.alaska) }, el('clipPath', { id: 'clipAlaska' }, defs));
     var farMain = el('g', { 'class': 'far', 'clip-path': 'url(#clipMain)' }, svg);
-    var farAk = el('g', { 'class': 'far', 'clip-path': 'url(#clipAlaska)' }, svg);
+    // the Alaska and Hawaii insets live in one group that slides left at runtime, so their boxes sit against the page's
+    // left edge (the title's) on a wide screen, where the letterboxed frame would leave them a band in (Steve, 2026-10-14:
+    // "both should be left justified with small margin"); a page-coloured backing under each box hides the neighbouring
+    // land, which used to be cut out of the clip above (the hole would stay behind when the boxes move)
+    var insetG = el('g', { 'class': 'inset-left' }, svg), LEFT = ['alaska', 'hawaii'];
+    Object.keys(boxes).forEach(function (k) { var b = boxes[k]; el('rect', { x: b.x0, y: b.y0, width: b.x1 - b.x0, height: b.y1 - b.y0, rx: 2, 'class': 'inset-back' }, LEFT.indexOf(k) >= 0 ? insetG : svg); });
+    var farAk = el('g', { 'class': 'far', 'clip-path': 'url(#clipAlaska)' }, insetG);
     [['far', farMain, 'fill'], ['farEdge', farMain, 'edge'], ['farAlaska', farAk, 'fill'], ['farAlaskaEdge', farAk, 'edge']].forEach(function (q) {
       if (o.paths[q[0]]) layer[q[0]] = el('path', { d: o.paths[q[0]], 'class': 'far-' + q[2] }, q[1]);
     });
     fadeEdges(defs, farAk, 'fadeAlaska', boxes.alaska, 14);
-    var land = el('g', { 'class': 'land' }, svg);
-    ['lower48', 'alaska', 'hawaii', 'pr'].forEach(function (k) { if (o.paths[k]) layer[k] = el('path', { d: o.paths[k], 'class': 'land-' + k }, land); });
+    var land = el('g', { 'class': 'land' }, svg), insetLand = el('g', { 'class': 'land' }, insetG);
+    ['lower48', 'alaska', 'hawaii', 'pr'].forEach(function (k) { if (o.paths[k]) layer[k] = el('path', { d: o.paths[k], 'class': 'land-' + k }, LEFT.indexOf(k) >= 0 ? insetLand : land); });
     // the state boundaries: stroke only, over the land, under the dots; the line keeps its width at every zoom
     if (o.paths.states) layer.states = el('path', { d: o.paths.states, 'class': 'states', 'vector-effect': 'non-scaling-stroke' }, el('g', { 'class': 'borders' }, svg));
+    if (o.paths.statesInset) layer.statesInset = el('path', { d: o.paths.statesInset, 'class': 'states', 'vector-effect': 'non-scaling-stroke' }, el('g', { 'class': 'borders' }, insetG)); // Alaska's and Hawaii's outlines ride with their insets
     // the big lakes as water over land and borders (the sources count them as land), shoreline stroked
     if (o.paths.lakes) layer.lakes = el('path', { d: o.paths.lakes, 'class': 'lakes', 'vector-effect': 'non-scaling-stroke' }, svg);
     // a faint dashed box around each inset, as atlases draw them
-    Object.keys(boxes).forEach(function (k) { var b = boxes[k]; el('rect', { x: b.x0, y: b.y0, width: b.x1 - b.x0, height: b.y1 - b.y0, rx: 2, 'class': 'inset-line', 'vector-effect': 'non-scaling-stroke' }, svg); });
-    var pins = el('g', { 'class': 'pins' }, svg), placed = [], pinOf = {};
+    Object.keys(boxes).forEach(function (k) { var b = boxes[k]; el('rect', { x: b.x0, y: b.y0, width: b.x1 - b.x0, height: b.y1 - b.y0, rx: 2, 'class': 'inset-line', 'vector-effect': 'non-scaling-stroke' }, LEFT.indexOf(k) >= 0 ? insetG : svg); });
+    var pins = el('g', { 'class': 'pins' }, svg), insetPins = el('g', { 'class': 'pins' }, insetG), placed = [], pinOf = {};
+    var inBox = function (x, y, b) { return x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1; };
     cities.forEach(function (c) {
       var p = project(c.lon, c.lat), x = +p[0].toFixed(1), y = +p[1].toFixed(1);
-      var a = el('a', { href: site(c), 'class': 'pin' + (c.live ? ' is-live' : ' is-soon'), 'data-key': c.key }, pins);
+      var onLeft = LEFT.some(function (k) { return inBox(x, y, boxes[k]); }); // Honolulu rides with the Hawaii inset
+      var a = el('a', { href: site(c), 'class': 'pin' + (c.live ? ' is-live' : ' is-soon'), 'data-key': c.key }, onLeft ? insetPins : pins);
       a.setAttribute('aria-label', c.name + ', ' + c.state + (c.live ? '' : ' (coming soon)'));
       el('title', {}, a).textContent = c.name + ', ' + c.state + (c.live ? ' — open the calendar' : ' — coming soon');
       var lb = c.label || { dx: 10, dy: 4, anchor: 'start' };
       var far = Math.abs(lb.dx) > 12 || Math.abs(lb.dy) > 16; // a leader when the name sits away from its dot
-      if (far) el('line', { x1: x, y1: y, x2: x + lb.dx * 0.8, y2: y + (lb.dy - 4) * 0.8, 'class': 'leader' }, a);
+      var leader = far ? el('line', { x1: x, y1: y, x2: x + lb.dx * 0.8, y2: y + (lb.dy - 4) * 0.8, 'class': 'leader' }, a) : null;
       el('circle', { cx: x, cy: y, r: 7, 'class': 'halo' }, a);
       el('circle', { cx: x, cy: y, r: 4.2, 'class': 'dot' }, a);
       var t = el('text', { x: x + lb.dx, y: y + lb.dy, 'text-anchor': lb.anchor, 'class': 'label' }, a);
       t.textContent = c.name;
-      placed.push({ x: x, y: y, dx: lb.dx, dy: lb.dy, home: lb, text: t, leader: far ? a.firstChild : null });
+      placed.push({ x: x, y: y, dx: lb.dx, dy: lb.dy, home: lb, text: t, leader: leader }); // the line itself — the pin's first child is its <title>, which took the rescaled ends until 2026-10-14 while the line grew with the zoom
       pinOf[c.key] = a;
     });
     // the list under the map: state, city, link
@@ -287,7 +296,8 @@
     // Alaska box on a wide screen can lie across it on a narrower one. After every zoom or resize each name whose box
     // (getBBox) touches an inset box tries the other side, under, over, under-right and under-left, and takes the first
     // place that clears the boxes and the other names — else the one that overlaps the boxes least. ----
-    var boxList = Object.keys(boxes).map(function (k) { return boxes[k]; });
+    var insetDX = 0; // the left insets' slide, map units (set per zoom/resize below); the name-nudging sees the boxes where they are
+    var boxList = []; function listBoxes() { boxList = Object.keys(boxes).map(function (k) { var b = boxes[k], d = LEFT.indexOf(k) >= 0 ? insetDX : 0; return { x0: b.x0 + d, y0: b.y0, x1: b.x1 + d, y1: b.y1 }; }); }
     function setPos(q, o, kk) {
       q.text.setAttribute('x', (q.x + o.dx / kk).toFixed(1)); q.text.setAttribute('y', (q.y + o.dy / kk).toFixed(1)); q.text.setAttribute('text-anchor', o.anchor);
       if (q.leader) { q.leader.setAttribute('x2', (q.x + o.dx * 0.8 / kk).toFixed(1)); q.leader.setAttribute('y2', (q.y + (o.dy - 4) * 0.8 / kk).toFixed(1)); }
@@ -315,6 +325,13 @@
     }
     var zoom = zoomable(svg, W, H, function (k) {
       var ks = parseFloat(svg.style.getPropertyValue('--ks')) || 1, kk = Math.max(k, ks);
+      // slide the left insets by the letterbox band (the frame is centred in the svg's box; preserveAspectRatio meet), so
+      // the Alaska and Hawaii boxes start at the svg's left edge, 1.5rem in from the window like the title; never rightwards
+      var ka = parseFloat(svg.style.getPropertyValue('--ka')) || 1, rect = svg.getBoundingClientRect();
+      var band = Math.max(0, (rect.width - (W / k) * ka) / 2);
+      insetDX = Math.min(0, -band / ka - boxes.alaska.x0);
+      insetG.setAttribute('transform', 'translate(' + insetDX.toFixed(2) + ' 0)');
+      listBoxes();
       placed.forEach(function (q) { setPos(q, q.home, kk); });
       keepOffBoxes(kk);
       wantFine(k);

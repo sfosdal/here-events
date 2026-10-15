@@ -36,7 +36,7 @@ body {
 a { color: inherit; }
 
 /* ---- masthead ---- */
-.masthead { width: min(var(--pagew), 100% - 3rem); margin: 1.6rem auto 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.masthead { width: min(var(--pagew), 100% - 3rem); margin: 1.6rem auto 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; position: relative; z-index: 2; } /* above the fold's fade overlay, which starts at the window's top (2026-10-14) */
 .eyebrow { margin: 0; font-family: var(--mono); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
 h1 { margin: .1rem 0 0; font-family: var(--display); font-weight: 700; font-size: clamp(2.8rem, 8vw, 4.6rem); line-height: .95; letter-spacing: -.01em; text-transform: uppercase; color: var(--ink-bright); }
 h1 .dot { color: var(--gold); }
@@ -67,6 +67,23 @@ h1 .dot { color: var(--gold); }
   background: linear-gradient(180deg, var(--sky), transparent 8%, transparent 92%, var(--sky)), linear-gradient(90deg, transparent 94%, var(--sky)); }
 /* zoomed in, the left edge shows land too (the whole map has no hard edge, Steve 2026-10-14); at k=1 that side is the inset boxes, so no fade there */
 .map-stage:has(#usMap.is-zoomed)::before { background: linear-gradient(180deg, var(--sky), transparent 8%, transparent 92%, var(--sky)), linear-gradient(90deg, var(--sky), transparent 6%, transparent 94%, var(--sky)); }
+/* on a wide screen the fade starts at the window's top edge, not the map's: the same overlay drawn on the fold instead
+   of the map stage (the map itself does not move), the map's own width, running from the top of the window to the foot
+   of the map, so the land arrives already half faded under the masthead and comes in slowly from there (Steve,
+   2026-10-14: "map should slowfade to the top of the window … including behind the top title thingy"; then: "didn't want
+   it to move just to extend fade boundary so it faded at the top of the window") */
+@media (min-width: 701px) {
+  :root:not([data-share]) .fold { position: relative; overflow: clip; } /* the clip the svg no longer does: the land stops at the fold's foot */
+  :root:not([data-share]) #usMap { overflow: visible; } /* the land drawn BLEED units past the frame spills out of the svg's box: up behind the masthead to the window's top, and out to the sides (the map itself stays put; "still want the fade to GO ALL THE WAY TO THE TOP of the window") */
+  :root:not([data-share]) .map-stage::before { display: none; }
+  /* the top fade runs from the window's edge to .8rem under the frame's top — the masthead's height (its margin, the eyebrow,
+     the h1 at .95 line height, the map's margin) plus .8rem — so the land behind the title fades in and the Alaska box, 24
+     units down the frame, keeps a crisp edge (Steve: "I still want alaska at the top", the boxes must not fade) */
+  :root:not([data-share]) .fold { --fade-top: calc(4.5rem + .95 * clamp(2.8rem, 8vw, 4.6rem)); }
+  :root:not([data-share]) .fold::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, var(--sky), transparent var(--fade-top), transparent 93%, var(--sky)), linear-gradient(90deg, transparent 94%, var(--sky)); }
+  :root:not([data-share]) .fold:has(#usMap.is-zoomed)::before { background: linear-gradient(180deg, var(--sky), transparent var(--fade-top), transparent 93%, var(--sky)), linear-gradient(90deg, var(--sky), transparent 6%, transparent 94%, var(--sky)); }
+}
 #usMap.is-zoomed { cursor: grab; }
 #usMap.is-zoomed:active { cursor: grabbing; }
 #usMap:focus-visible { box-shadow: 0 0 0 2px var(--ink-soft); border-radius: .4rem; }
@@ -84,6 +101,7 @@ main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .far-edge { fill: none; stroke: color-mix(in srgb, var(--land-edge) 50%, var(--sky)); stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; }
 .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .inset-line { fill: none; stroke: var(--land-edge); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; opacity: .7; }
+.inset-back { fill: var(--sky); stroke: none; } /* under each inset: hides the neighbouring land where the box sits (the left insets slide, see map.js) */
 .lakes { fill: var(--sky); fill-rule: evenodd; stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
 .states { fill: none; stroke: var(--land-edge); stroke-width: .7; stroke-opacity: .75; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
 .pin { cursor: pointer; text-decoration: none; }

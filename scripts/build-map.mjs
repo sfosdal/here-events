@@ -68,10 +68,16 @@ const region = (lon, lat) => lat > 50 ? 'alaska' : lat < 23 && lon < -140 ? 'haw
 
 // ---- the inset boxes (map units): Alaska over Hawaii in the left column, Puerto Rico in the Atlantic. Each inset is
 // projected at the origin, measured, then translated to the centre of its box; the boxes are drawn dashed by map.js. ----
-const BOX = { // the top of the Alaska box clears the page's edge fade (7% of the frame = 45 units on a phone)
-  alaska: { x0: 10, y0: 48, x1: 284, y1: 222 }, // x1 284 (was 292): room for the Lower Queen Anne name under its dot (Steve, 2026-10-14: "no text overlap with the boxes")
-  hawaii: { x0: 10, y0: 238, x1: 284, y1: 392 },
-  pr: { x0: 1036, y0: 296, x1: 1180, y1: 372 },
+const BOX = { // Alaska at the top of the left column, Hawaii at its foot, Puerto Rico at the right just above the zoom buttons
+  // (Steve, 2026-10-14: "alaska left up justified", "hawaii left bottom justified", "puerto rico right just above the
+  // +-location buttons", "I still want alaska at the top") — and clear of the page's fade bands ("the boxes around the
+  // outlying places should be moved so that they do not fade"): the top fade ends .8rem under the frame's top (styles.css
+  // sizes it from the masthead), so Alaska starts 24 units down; the bottom fade is the fold's last 7% (~70 units with the
+  // map's padding), the right fade its last 6% (~50 units into the frame on a 1100 px window). 10 units off the frame's
+  // left edge, where there is no fade.
+  alaska: { x0: 10, y0: 24, x1: 284, y1: 198 }, // x1 284 (was 292): room for the Lower Queen Anne name under its dot (Steve, 2026-10-14: "no text overlap with the boxes")
+  hawaii: { x0: 10, y0: 416, x1: 284, y1: 570 },
+  pr: { x0: 1076, y0: 394, x1: 1220, y1: 470 },
 };
 function bbox(polys, proj) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -226,8 +232,10 @@ function buildLayer({ countries, states, lakes }, opts, label) {
   for (const poly of polysOf(us)) for (const ring of poly) { const r = ringPath(ring); if (r) paths[r.reg].push(r.d); }
   for (const poly of polysOf(pr)) for (const ring of poly) { const r = ringPath(ring, 'pr'); if (r) paths.pr.push(r.d); }
   // the state boundaries: one stroke-only path, every state's rings; shared borders are drawn twice, which a thin line hides
-  const stateRings = [];
-  for (const f of usStates) for (const poly of polysOf(f)) for (const ring of poly) { const r = ringPath(ring); if (r) stateRings.push(r.d); }
+  // Alaska's and Hawaii's own rings go in a path of their own (`statesInset`): map.js slides the two insets left at runtime,
+  // and their outlines must slide with them (2026-10-14: the first slide left ghost outlines behind in the main layer)
+  const stateRings = [], insetRings = [];
+  for (const f of usStates) { const inset = /^(AK|HI)$/.test(f.properties.postal); for (const poly of polysOf(f)) for (const ring of poly) { const r = ringPath(ring); if (r) (inset ? insetRings : stateRings).push(r.d); } }
   const lakeRings = []; const found = new Set();
   for (const f of lakes.features) {
     const name = lakeName(f.properties.name);
@@ -259,7 +267,7 @@ function buildLayer({ countries, states, lakes }, opts, label) {
     }
   }
   const out = {
-    paths: { lower48: paths.lower48.join(''), alaska: paths.alaska.join(''), hawaii: paths.hawaii.join(''), pr: paths.pr.join(''), states: stateRings.join(''), lakes: lakeRings.join(''), far: far.join(''), farAlaska: farAlaska.join(''), farEdge: farEdge.join(''), farAlaskaEdge: farAlaskaEdge.join('') },
+    paths: { lower48: paths.lower48.join(''), alaska: paths.alaska.join(''), hawaii: paths.hawaii.join(''), pr: paths.pr.join(''), states: stateRings.join(''), statesInset: insetRings.join(''), lakes: lakeRings.join(''), far: far.join(''), farAlaska: farAlaska.join(''), farEdge: farEdge.join(''), farAlaskaEdge: farAlaskaEdge.join('') },
   };
   console.log(`${label}: lower48 ${paths.lower48.length} rings, alaska ${paths.alaska.length}, hawaii ${paths.hawaii.length}, pr ${paths.pr.length}, ${stateRings.length} state rings, ${lakeRings.length} lake rings, ${far.length} + ${farAlaska.length} neighbour rings, ${dropped} rings dropped as specks; ${JSON.stringify(out).length} bytes`);
   return out;
