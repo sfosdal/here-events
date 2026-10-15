@@ -18,6 +18,18 @@
       }
     },
     {
+      "key": "pioneersquare",
+      "url": "https://pioneersquare.seattle.here.events/",
+      "name": "Pioneer Square",
+      "city": "Seattle",
+      "state": "WA",
+      "lat": 47.601,
+      "lon": -122.332,
+      "tz": "America/Los_Angeles",
+      "live": true,
+      "label": {"dx": -8, "dy": 9, "anchor": "end"}
+    },
+    {
       "key": "everett",
       "name": "Everett",
       "city": "Everett",
