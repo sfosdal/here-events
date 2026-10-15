@@ -150,6 +150,17 @@
       }
     },
     {
+      "key": "denver",
+      "name": "Denver",
+      "city": "Denver",
+      "state": "CO",
+      "lat": 39.739,
+      "lon": -104.99,
+      "tz": "America/Denver",
+      "live": true,
+      "label": { "anchor": "start", "dx": 10, "dy": 4 }
+    },
+    {
       "key": "honolulu",
       "name": "Honolulu",
       "city": "Honolulu",
