@@ -30,6 +30,18 @@
       "label": {"dx": -8, "dy": 9, "anchor": "end"}
     },
     {
+      "key": "seattle",
+      "url": "https://seattle.here.events/",
+      "name": "Seattle",
+      "city": "Seattle",
+      "state": "WA",
+      "lat": 47.612,
+      "lon": -122.318,
+      "tz": "America/Los_Angeles",
+      "live": true,
+      "label": {"dx": 12, "dy": 4, "anchor": "start"}
+    },
+    {
       "key": "everett",
       "name": "Everett",
       "city": "Everett",
