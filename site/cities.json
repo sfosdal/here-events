@@ -408,6 +408,134 @@
         "dy": -8,
         "anchor": "start"
       }
+    },
+    {
+      "key": "sanfrancisco",
+      "url": "https://sanfrancisco.here.events/",
+      "name": "San Francisco",
+      "city": "San Francisco",
+      "state": "CA",
+      "lat": 37.775,
+      "lon": -122.419,
+      "tz": "America/Los_Angeles",
+      "live": false,
+      "label": {
+        "dx": -10,
+        "dy": 4,
+        "anchor": "end"
+      }
+    },
+    {
+      "key": "santabarbara",
+      "url": "https://santabarbara.here.events/",
+      "name": "Santa Barbara",
+      "city": "Santa Barbara",
+      "state": "CA",
+      "lat": 34.421,
+      "lon": -119.698,
+      "tz": "America/Los_Angeles",
+      "live": false,
+      "label": {
+        "dx": -10,
+        "dy": 10,
+        "anchor": "end"
+      }
+    },
+    {
+      "key": "dallas",
+      "url": "https://dallas.here.events/",
+      "name": "Dallas",
+      "city": "Dallas",
+      "state": "TX",
+      "lat": 32.777,
+      "lon": -96.797,
+      "tz": "America/Chicago",
+      "live": false,
+      "label": {
+        "dx": 10,
+        "dy": 4,
+        "anchor": "start"
+      }
+    },
+    {
+      "key": "neworleans",
+      "url": "https://neworleans.here.events/",
+      "name": "New Orleans",
+      "city": "New Orleans",
+      "state": "LA",
+      "lat": 29.951,
+      "lon": -90.072,
+      "tz": "America/Chicago",
+      "live": false,
+      "label": {
+        "dx": 2,
+        "dy": 18,
+        "anchor": "middle"
+      }
+    },
+    {
+      "key": "nashville",
+      "url": "https://nashville.here.events/",
+      "name": "Nashville",
+      "city": "Nashville",
+      "state": "TN",
+      "lat": 36.163,
+      "lon": -86.782,
+      "tz": "America/Chicago",
+      "live": false,
+      "label": {
+        "dx": 10,
+        "dy": 4,
+        "anchor": "start"
+      }
+    },
+    {
+      "key": "newyork",
+      "url": "https://newyork.here.events/",
+      "name": "New York",
+      "city": "New York",
+      "state": "NY",
+      "lat": 40.713,
+      "lon": -74.006,
+      "tz": "America/New_York",
+      "live": false,
+      "label": {
+        "dx": 10,
+        "dy": 10,
+        "anchor": "start"
+      }
+    },
+    {
+      "key": "boston",
+      "url": "https://boston.here.events/",
+      "name": "Boston",
+      "city": "Boston",
+      "state": "MA",
+      "lat": 42.36,
+      "lon": -71.059,
+      "tz": "America/New_York",
+      "live": false,
+      "label": {
+        "dx": 10,
+        "dy": -4,
+        "anchor": "start"
+      }
+    },
+    {
+      "key": "maui",
+      "url": "https://maui.here.events/",
+      "name": "Maui",
+      "city": "Maui",
+      "state": "HI",
+      "lat": 20.889,
+      "lon": -156.474,
+      "tz": "Pacific/Honolulu",
+      "live": false,
+      "label": {
+        "dx": 8,
+        "dy": 12,
+        "anchor": "start"
+      }
     }
   ]
 }
