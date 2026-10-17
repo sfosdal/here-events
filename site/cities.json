@@ -42,6 +42,18 @@
       "label": {"dx": 12, "dy": 4, "anchor": "start"}
     },
     {
+      "key": "burien",
+      "url": "https://burien.here.events/",
+      "name": "Burien",
+      "city": "Burien",
+      "state": "WA",
+      "lat": 47.470,
+      "lon": -122.347,
+      "tz": "America/Los_Angeles",
+      "live": true,
+      "label": {"dx": -9, "dy": -3, "anchor": "end"}
+    },
+    {
       "key": "everett",
       "name": "Everett",
       "city": "Everett",
