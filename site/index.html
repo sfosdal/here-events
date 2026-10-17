@@ -9,6 +9,14 @@
   // Before the first paint: the theme (light, dark, or system); map.js applyTheme keeps the pill in sync.
   try { var t = localStorage.getItem('here-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
+<!-- Google tag (gtag.js) — the here.events GA4 property, one stream for the map and every city; reports split by hostname -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BTQFXS68HN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BTQFXS68HN');
+</script>
 <title>here.events</title>
 <meta name="description" content="Local events, one city at a time: what's on at the arenas, stadiums, theatres and music rooms of each covered city, with the home teams' seasons — a calendar, iCal feeds and an embeddable widget per city.">
 <link rel="canonical" href="https://here.events/">
