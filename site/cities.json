@@ -129,6 +129,17 @@
       }
     },
     {
+      "key": "eugene",
+      "name": "Eugene",
+      "city": "Eugene",
+      "state": "OR",
+      "lat": 44.052,
+      "lon": -123.087,
+      "tz": "America/Los_Angeles",
+      "live": true,
+      "label": {"dx": -9, "dy": 4, "anchor": "end"}
+    },
+    {
       "key": "portland",
       "name": "Portland",
       "city": "Portland",
