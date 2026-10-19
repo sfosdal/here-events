@@ -7,6 +7,7 @@
 //   site/sitemap-index.xml — a sitemap index naming the map's sitemap and every
 //                            live city's, one submission in Search Console for all
 //                            (the Domain property sc-domain:here.events owns every host)
+//   site/sitemap.xml       — the map's own sitemap, lastmod = today (Google reads lastmod to decide recrawls)
 //   site/robots.txt        — names both sitemaps
 // All from site/cities.json, the one place a city is added. Run after any change
 // to it, before committing: node scripts/cities-static.mjs
@@ -34,5 +35,6 @@ const live = cities.filter((c) => c.live);
 const today = new Date().toISOString().slice(0, 10);
 const maps = ['https://here.events/sitemap.xml'].concat(live.map((c) => `${url(c)}sitemap.xml`));
 writeFileSync(join(site, 'sitemap-index.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${maps.map((m) => `  <sitemap><loc>${m}</loc><lastmod>${today}</lastmod></sitemap>`).join('\n')}\n</sitemapindex>\n`);
+writeFileSync(join(site, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://here.events/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq></url>\n</urlset>\n`);
 writeFileSync(join(site, 'robots.txt'), 'User-agent: *\nAllow: /\n\nSitemap: https://here.events/sitemap.xml\nSitemap: https://here.events/sitemap-index.xml\n');
 console.log(`cities-static: ${cities.length} cities in the list (${live.length} live), sitemap-index.xml ${maps.length} sitemaps, robots.txt`);
