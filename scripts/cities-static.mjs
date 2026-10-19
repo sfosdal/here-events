@@ -1,9 +1,9 @@
 // Writes what Google needs to find every city from here.events without running
 // JavaScript (Steve, 2026-10-18: "I want google to index here.events and its
 // cities / neighborhoods … the new top priority"):
-//   site/index.html        — the <ul id="cityList"> rows as static HTML (map.js
-//                            rebuilds the same list at runtime, so nothing changes
-//                            on screen; the HTML now carries one real <a> per city)
+//   site/index.html        — the City List pop-up's rows as static HTML, grouped by
+//                            state (the pop-up is the only list; the HTML carries one
+//                            real <a> per live city, closed or open)
 //   site/sitemap-index.xml — a sitemap index naming the map's sitemap and every
 //                            live city's, one submission in Search Console for all
 //                            (the Domain property sc-domain:here.events owns every host)
@@ -20,15 +20,23 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const url = (c) => c.url || `https://${c.key}.here.events/`;
 const { cities } = JSON.parse(readFileSync(join(site, 'cities.json'), 'utf8'));
 
-// the list under the map, state by state, as map.js builds it
+// the pop-up's list, state by state, as the city sites' More Cities sheet groups it
+// (lqa scripts/cities-list.mjs): a live city is a link, a coming-soon one plain text
+// tagged "soon", a neighbourhood tagged with its city (Lower Queen Anne · Seattle)
+const STATES = { AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming', DC: 'District of Columbia', PR: 'Puerto Rico', QR: 'Quintana Roo, Mexico' };
+const stateName = (c) => STATES[c.state] || c.state;
 const byState = {};
-cities.forEach((c) => (byState[c.state] = byState[c.state] || []).push(c));
-const rows = Object.keys(byState).sort().flatMap((st) => byState[st].sort((a, b) => a.name.localeCompare(b.name)).map((c) =>
-  `      <li class="${c.live ? 'is-live' : 'is-soon'}"><span class="st">${esc(c.state)}</span><a href="${esc(url(c))}">${esc(c.name)}</a><span class="note">${c.live ? esc(url(c).replace(/^https:\/\/|\/$/g, '')) : 'coming soon'}</span></li>`));
+cities.forEach((c) => (byState[stateName(c)] = byState[stateName(c)] || []).push(c));
+const groups = Object.keys(byState).sort().map((st) => `      <section><h3>${esc(st)}</h3><ul>\n` +
+  byState[st].sort((a, b) => a.name.localeCompare(b.name)).map((c) => {
+    const name = c.live ? `<a href="${esc(url(c))}">${esc(c.name)}</a>` : `<span title="Coming soon">${esc(c.name)}</span>`;
+    const hood = c.city && !c.name.includes(c.city) ? `<small>${esc(c.city)}</small>` : '';
+    return `        <li${c.live ? '' : ' class="is-soon"'}>${name}${hood}${c.live ? '' : '<small>soon</small>'}</li>`;
+  }).join('\n') + '\n      </ul></section>');
 const html = readFileSync(join(site, 'index.html'), 'utf8');
-const re = /(<ul id="cityList" class="city-list">)[\s\S]*?(<\/ul>)/;
-if (!re.test(html)) throw new Error('index.html has no <ul id="cityList">');
-writeFileSync(join(site, 'index.html'), html.replace(re, `$1\n${rows.join('\n')}\n    $2`));
+const re = /(<div id="cityGroups" class="city-groups">)[\s\S]*?(<\/div>)/;
+if (!re.test(html)) throw new Error('index.html has no <div id="cityGroups">');
+writeFileSync(join(site, 'index.html'), html.replace(re, `$1\n${groups.join('\n')}\n    $2`));
 
 // the sitemap index: the map's own sitemap, then every live city's
 const live = cities.filter((c) => c.live);
@@ -37,4 +45,4 @@ const maps = ['https://here.events/sitemap.xml'].concat(live.map((c) => `${url(c
 writeFileSync(join(site, 'sitemap-index.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${maps.map((m) => `  <sitemap><loc>${m}</loc><lastmod>${today}</lastmod></sitemap>`).join('\n')}\n</sitemapindex>\n`);
 writeFileSync(join(site, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://here.events/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq></url>\n</urlset>\n`);
 writeFileSync(join(site, 'robots.txt'), 'User-agent: *\nAllow: /\n\nSitemap: https://here.events/sitemap.xml\nSitemap: https://here.events/sitemap-index.xml\n');
-console.log(`cities-static: ${cities.length} cities in the list (${live.length} live), sitemap-index.xml ${maps.length} sitemaps, robots.txt`);
+console.log(`cities-static: ${cities.length} cities in the pop-up (${live.length} live), sitemap-index.xml ${maps.length} sitemaps, robots.txt`);

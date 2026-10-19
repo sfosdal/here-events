@@ -44,9 +44,7 @@ h1 .dot { color: var(--gold); }
 .list-pill { display: inline-flex; align-items: center; gap: .4rem; height: 2.4rem; padding: 0 .9rem; border: 1px solid var(--line); border-radius: 999px; background: var(--mist); color: var(--ink); font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
 .list-pill svg { width: 1rem; height: 1rem; color: var(--gold); }
 .list-pill:hover { border-color: var(--gold); }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-#citiesH { scroll-margin-top: 1rem; }
+
 
 /* the theme pill, as the city sites draw it */
 .theme-toggle { position: relative; display: inline-flex; align-items: center; gap: 0; padding: .2rem; border: 1px solid var(--line); border-radius: 999px; background: var(--mist); }
@@ -148,17 +146,32 @@ main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .near { color: var(--gold); }
 .near[hidden] { display: none; }
 
-/* ---- the list ---- */
-.cities { margin: 1.8rem 0 2.5rem; }
-.cities h2 { font-family: var(--display); font-weight: 700; font-size: 1.6rem; text-transform: uppercase; letter-spacing: .02em; margin: 0 0 .6rem; }
-.city-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: .35rem .9rem; }
-.city-list li { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: baseline; gap: .6rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--mist); }
-.city-list .st { font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; color: var(--gold); }
-.city-list a { font-family: var(--display); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; text-decoration: none; }
-.city-list a:hover { color: var(--gold); }
-.city-list .note { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; color: var(--ink-soft); text-transform: uppercase; }
-.city-list li.is-soon a { color: var(--ink-soft); font-weight: 500; }
-.city-list li.is-soon .st { color: var(--ink-soft); }
+/* ---- the City List pop-up: the city sites' More Cities sheet (lqa styles.css .city-sheet), Steve 2026-10-19 —
+   a bottom sheet on phones, a centred dialog on wider screens; every city grouped by state in columns ---- */
+.sheet { position: fixed; inset: 0; z-index: 35; display: flex; align-items: flex-end; justify-content: center; } /* over the sticky footer (12) */
+.sheet[hidden] { display: none; }
+.sheet:target { display: flex; } /* no script: the pill's #citySheet link shows it */
+.sheet-back { position: absolute; inset: 0; background: rgba(0, 0, 0, .55); }
+.sheet-card { position: relative; width: 100%; max-height: 85vh; max-height: 85dvh; overflow: auto; background: var(--mist); color: var(--ink); border-radius: 16px 16px 0 0; padding: 1.1rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom)); box-shadow: 0 -8px 30px rgba(0, 0, 0, .35); outline: none; overscroll-behavior: contain; }
+.sheet-venue { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin: 0 0 .2rem; }
+.sheet-title { font-family: var(--display); font-weight: 700; font-size: 1.6rem; text-transform: uppercase; letter-spacing: .02em; margin: 0 0 .8rem; }
+body.sheet-open { overflow: hidden; }
+.city-groups { columns: 9rem; column-gap: 1.4rem; margin-bottom: 1rem; } /* columns, not a grid: a tall state (Washington) packs beside the short ones */
+.city-groups section { break-inside: avoid; margin-bottom: .9rem; }
+.city-groups h3 { margin: 0 0 .3rem; font: 500 .68rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.city-groups ul { list-style: none; margin: 0; padding: 0; }
+.city-groups li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .45rem; padding: .18rem 0; font-size: .95rem; }
+.city-groups li a { color: var(--ink); text-decoration: none; font-weight: 600; }
+.city-groups li a:hover { color: var(--gold); }
+.city-groups li small { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.city-groups li.is-soon span { color: var(--ink-soft); }
+.source-note { margin: 0 0 1rem; font-size: .72rem; color: var(--ink-soft); }
+.city-close { display: block; margin: 0 auto; font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px; padding: .5em .95em; background: var(--sky); color: var(--ink); border: 1px solid var(--line); }
+@media (min-width: 641px) {
+  .sheet { align-items: center; }
+  .sheet-card { width: min(46rem, calc(100vw - 2rem)); border-radius: 12px; padding: 1.1rem 1.4rem 1.2rem; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
+  .city-close { display: none; } /* outside click or Esc, as on the city sites */
+}
 
 /* ---- footer: the city sites' footer (lqa-events styles.css), Steve 2026-10-14: "add ghostwood sites branding like here
    to the here.events page" — the page's own background under a hairline that warms to the brand orange at the centre and
@@ -171,9 +184,8 @@ a.gw { display: flex; align-items: center; gap: .7rem; text-decoration: none; co
 .gw-credit { margin: 0; font-family: var(--mono); font-size: .9rem; letter-spacing: .1em; line-height: 1; text-transform: uppercase; }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
 a.gw:hover .gw-credit strong { color: var(--ink-bright); }
-.source-note { margin: 1.2rem 0 0; font-size: .72rem; color: var(--ink-soft); }
 
-/* ---- narrow screens: the map keeps its dots, drops the always-on names (the list below carries them) ---- */
+/* ---- narrow screens: the map keeps its dots, drops the always-on names (the City List pop-up carries them) ---- */
 @media (max-width: 700px) {
   .fold { display: block; height: auto; min-height: 0; } /* a portrait phone: the map is as wide as the screen and as tall as that makes it */
   .map { margin-top: 1.2rem; display: block; }
@@ -195,7 +207,7 @@ a.gw:hover .gw-credit strong { color: var(--ink-bright); }
 :root[data-share] .masthead { padding: 0 0 0 48px; margin: 0; display: block; }
 :root[data-share] .masthead .eyebrow { font-size: 12px; letter-spacing: .1em; }
 :root[data-share] .masthead h1 { font-size: 58px; line-height: .9; }
-:root[data-share] .theme-toggle, :root[data-share] .list-pill, :root[data-share] .cities, :root[data-share] footer, :root[data-share] .zoom { display: none !important; }
+:root[data-share] .theme-toggle, :root[data-share] .list-pill, :root[data-share] .sheet, :root[data-share] footer, :root[data-share] .zoom { display: none !important; }
 :root[data-share] .fold { display: contents; } /* the masthead and the map are the card's two columns */
 :root[data-share] .map { margin: 0; padding: 0 24px 0 0; display: block; width: auto; }
 :root[data-share] #usMap { height: auto; aspect-ratio: 1280 / 640; }

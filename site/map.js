@@ -1,7 +1,7 @@
 // here.events — the covered-cities map. Draws the US outline and the state
 // boundaries from us-outline.json, places one dot per city from cities.json
 // with the same Albers-USA projection scripts/build-map.mjs used (the numbers
-// must match), lists the cities below the map, and lets the reader zoom and
+// must match), opens the city list as a pop-up, and lets the reader zoom and
 // pan (wheel, pinch, drag, the + − buttons, double-click, the keyboard) —
 // Steve, 2026-10-12: "the base maps … should support zooming and boundaries".
 // Past 3× the 1:10m layer (us-outline-fine.json) is fetched once and swapped
@@ -24,6 +24,21 @@
     });
   }
   applyTheme(document.documentElement.dataset.theme);
+
+  // ---- the City List pop-up (static rows from scripts/cities-static.mjs): the pill opens it; Esc, the backdrop or
+  // Close shut it — the city sites' More Cities sheet (Steve, 2026-10-19). Without script the pill's #citySheet
+  // target shows it through CSS. ----
+  (function () {
+    var sh = $('citySheet'), pill = document.querySelector('.list-pill');
+    if (!sh || !pill) return;
+    var card = sh.querySelector('.sheet-card'), last = null;
+    function esc(e) { if (e.key === 'Escape') off(); }
+    function off() { sh.hidden = true; document.body.classList.remove('sheet-open'); document.removeEventListener('keydown', esc); if (last) last.focus(); }
+    function on(e) { if (e) e.preventDefault(); last = document.activeElement; sh.hidden = false; document.body.classList.add('sheet-open'); document.addEventListener('keydown', esc); card.focus(); }
+    pill.addEventListener('click', on);
+    sh.querySelector('.sheet-back').addEventListener('click', off);
+    sh.querySelector('.city-close').addEventListener('click', off);
+  })();
 
   // ?share renders the 1200x630 card for share.png (dark, map only; the build screenshots it headless).
   if (/[?&]share\b/.test(location.search)) { document.documentElement.dataset.theme = 'dark'; document.documentElement.dataset.share = '1'; }
@@ -257,19 +272,6 @@
       t.textContent = c.name;
       placed.push({ x: x, y: y, dx: lb.dx, dy: lb.dy, home: lb, text: t, leader: leader }); // the line itself — the pin's first child is its <title>, which took the rescaled ends until 2026-10-14 while the line grew with the zoom
       pinOf[c.key] = a;
-    });
-    // the list under the map: state, city, link
-    var ul = $('cityList'); ul.textContent = '';
-    var byState = {};
-    cities.forEach(function (c) { (byState[c.state] = byState[c.state] || []).push(c); });
-    Object.keys(byState).sort().forEach(function (st) {
-      byState[st].sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (c) {
-        var li = document.createElement('li'); li.className = c.live ? 'is-live' : 'is-soon';
-        var s = document.createElement('span'); s.className = 'st'; s.textContent = c.state; li.appendChild(s);
-        var a = document.createElement('a'); a.href = site(c); a.textContent = c.name; li.appendChild(a);
-        var n = document.createElement('span'); n.className = 'note'; n.textContent = c.live ? site(c).replace(/^https:\/\/|\/$/g, '') : 'coming soon'; li.appendChild(n);
-        ul.appendChild(li);
-      });
     });
     var live = cities.filter(function (c) { return c.live; }).length;
     $('count').textContent = live + ' live, ' + (cities.length - live) + ' on the way';
