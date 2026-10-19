@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://here.events/sitemap.xml
+Sitemap: https://here.events/sitemap-index.xml
