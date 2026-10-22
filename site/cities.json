@@ -140,6 +140,17 @@
       "label": {"dx": -9, "dy": 4, "anchor": "end"}
     },
     {
+      "key": "salem",
+      "name": "Salem",
+      "city": "Salem",
+      "state": "OR",
+      "lat": 44.943,
+      "lon": -123.035,
+      "tz": "America/Los_Angeles",
+      "live": true,
+      "label": {"dx": 9, "dy": 13, "anchor": "start"}
+    },
+    {
       "key": "portland",
       "name": "Portland",
       "city": "Portland",
