@@ -151,6 +151,16 @@
       "label": {"dx": 9, "dy": 13, "anchor": "start"}
     },
     {
+      "key": "bend",
+      "name": "Bend",
+      "city": "Bend",
+      "state": "OR",
+      "lat": 44.058,
+      "lon": -121.315,
+      "tz": "America/Los_Angeles",
+      "live": true
+    },
+    {
       "key": "portland",
       "name": "Portland",
       "city": "Portland",
