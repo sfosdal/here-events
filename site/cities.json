@@ -217,6 +217,21 @@
       "label": { "anchor": "start", "dx": 10, "dy": 4 }
     },
     {
+      "key": "kona",
+      "name": "Kona",
+      "city": "Kona",
+      "state": "HI",
+      "lat": 19.640,
+      "lon": -155.996,
+      "tz": "Pacific/Honolulu",
+      "live": true,
+      "label": {
+        "dx": 8,
+        "dy": 14,
+        "anchor": "start"
+      }
+    },
+    {
       "key": "honolulu",
       "name": "Honolulu",
       "city": "Honolulu",
