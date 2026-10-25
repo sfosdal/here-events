@@ -139,6 +139,8 @@ main { width: min(var(--pagew), 100% - 3rem); margin: 0 auto; flex: 1; }
 .pin .label { font-size: calc(13px / var(--ks, 1)); stroke-width: calc(3px / var(--ks, 1)); }
 /* the key and the count sit in the footer, right of the lockup (was a caption under the map until 2026-10-14) */
 .foot-map { display: flex; gap: 1.2rem; align-items: center; justify-content: flex-end; font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.foot-map .privacy { color: inherit; text-decoration: none; } /* the privacy page AdSense asks for (2026-10-24) */
+.foot-map .privacy:hover { color: var(--gold); text-decoration: underline; }
 .keys { display: inline-flex; align-items: center; gap: 1.2rem; } /* the two swatches stay one row, even when the footer stacks on a phone */
 .key { display: inline-flex; align-items: center; gap: .4rem; }
 .sw { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: var(--gold); }

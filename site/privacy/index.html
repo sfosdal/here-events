@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  // Before the first paint: the theme the visitor picked on the map (light, dark, or system).
+  try { var t = localStorage.getItem('here-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<title>Privacy — here.events</title>
+<meta name="description" content="How here.events and its city sites use cookies, Google Analytics and Google AdSense.">
+<link rel="canonical" href="https://here.events/privacy/">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  /* the privacy page AdSense asks for (2026-10-24): one column of reading text on the map site's palette */
+  .doc { width: min(40rem, 100% - 2.5rem); margin: 2.4rem auto 4rem; line-height: 1.6; }
+  .doc .back { font-family: var(--mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); text-decoration: none; }
+  .doc .back:hover { color: var(--gold); }
+  .doc h1 { font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1.05; margin: 1.2rem 0 .3rem; }
+  .doc .updated { margin: 0 0 2rem; color: var(--ink-soft); font-size: .9rem; }
+  .doc h2 { font-size: 1.1rem; margin: 2rem 0 .4rem; }
+  .doc p, .doc li { color: var(--ink); }
+  .doc ul { padding-left: 1.2rem; }
+  .doc a { color: var(--gold); }
+</style>
+</head>
+<body>
+<main class="doc">
+  <a class="back" href="../">here.events</a>
+  <h1>Privacy</h1>
+  <p class="updated">Last updated October 24, 2026</p>
+
+  <p>here.events and its city and neighbourhood sites (such as seattle.here.events and lqa.seattle.here.events) are run by Ghostwood Labs LLC, Everett, Washington. The sites have no accounts and no sign-up, and they never ask for your name or email. This page explains what is stored and who else sees it.</p>
+
+  <h2>Stored in your own browser</h2>
+  <p>Your choices on the sites are kept in your browser's local storage: light or dark theme, list or month view, and the rooms and teams you filter by. They never leave your device, and clearing your browser's site data removes them.</p>
+
+  <h2>Google Analytics</h2>
+  <p>We use Google Analytics to count visits and see which pages and cities are used. It sets cookies and sends Google details such as the pages you view, your browser and device type, and your approximate location from your IP address. We see only totals, never who you are. You can block it with Google's <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener">opt-out browser add-on</a>. More in <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">how Google uses information from sites that use its services</a>.</p>
+
+  <h2>Advertising</h2>
+  <p>The sites show ads served by Google AdSense, which pays for running them. Google and its partners use cookies to show ads based on your visits to this and other sites, and to measure them. You can turn off personalised ads in <a href="https://adssettings.google.com/" rel="noopener">Google's Ad Settings</a>, and opt out of many other ad companies' cookies at <a href="https://www.aboutads.info/choices/" rel="noopener">aboutads.info</a>. Visitors in the European Economic Area, the UK and Switzerland are asked for consent before any of these cookies are used, and can change their choice at any time from the privacy link the consent message leaves on the page.</p>
+
+  <h2>Event listings and links</h2>
+  <p>Listings come from the venues' and teams' own calendars and from ticket sellers such as Ticketmaster. When you follow a link to buy tickets you are on their site, under their privacy policy.</p>
+
+  <h2>Questions</h2>
+  <p>Email <a href="mailto:info@ghostwoodlabs.com">info@ghostwoodlabs.com</a>.</p>
+</main>
+</body>
+</html>
