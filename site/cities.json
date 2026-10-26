@@ -217,30 +217,26 @@
       "label": { "anchor": "start", "dx": 10, "dy": 4 }
     },
     {
-      "key": "kona",
-      "name": "Kona",
-      "city": "Kona",
+      "key": "bigisland",
+      "name": "Big Island",
+      "city": "Big Island",
       "state": "HI",
-      "lat": 19.640,
-      "lon": -155.996,
+      "lat": 19.600,
+      "lon": -155.520,
       "tz": "Pacific/Honolulu",
       "live": true,
-      "label": {
-        "dx": 8,
-        "dy": 14,
-        "anchor": "start"
-      }
+      "label": {"dx": 8, "dy": 4, "anchor": "start"}
     },
     {
-      "key": "hilo",
-      "name": "Hilo",
-      "city": "Hilo",
+      "key": "hawaii",
+      "name": "All Islands",
+      "city": "Hawaiʻi",
       "state": "HI",
-      "lat": 19.724,
-      "lon": -155.087,
+      "lat": 19.950,
+      "lon": -157.600,
       "tz": "Pacific/Honolulu",
       "live": true,
-      "label": {"dx": 8, "dy": -8, "anchor": "start"}
+      "label": {"dx": -8, "dy": 4, "anchor": "end"}
     },
     {
       "key": "honolulu",
