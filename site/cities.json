@@ -232,6 +232,17 @@
       }
     },
     {
+      "key": "hilo",
+      "name": "Hilo",
+      "city": "Hilo",
+      "state": "HI",
+      "lat": 19.724,
+      "lon": -155.087,
+      "tz": "Pacific/Honolulu",
+      "live": true,
+      "label": {"dx": 8, "dy": -8, "anchor": "start"}
+    },
+    {
       "key": "honolulu",
       "name": "Honolulu",
       "city": "Honolulu",
@@ -577,7 +588,7 @@
       "lat": 20.889,
       "lon": -156.474,
       "tz": "Pacific/Honolulu",
-      "live": false,
+      "live": true,
       "label": {
         "dx": 8,
         "dy": 12,
