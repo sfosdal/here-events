@@ -25,12 +25,12 @@
   }
   applyTheme(document.documentElement.dataset.theme);
 
-  // ---- the City List pop-up (static rows from scripts/cities-static.mjs): the pill opens it; Esc, the backdrop or
-  // Close shut it — the city sites' More Cities sheet (Steve, 2026-10-19). Without script the pill's #citySheet
-  // target shows it through CSS. ----
-  (function () {
-    var sh = $('citySheet'), pill = document.querySelector('.list-pill');
-    if (!sh || !pill) return;
+  // ---- the pop-ups: each masthead pill opens the sheet its href names — City List (static rows from
+  // scripts/cities-static.mjs) and By Activity (tango + curling, 2026-10-30); Esc, the backdrop or Close shut it —
+  // the city sites' More Cities sheet (Steve, 2026-10-19). Without script the pill's #target shows it through CSS. ----
+  document.querySelectorAll('.list-pill[href^="#"]').forEach(function (pill) {
+    var sh = $(pill.getAttribute('href').slice(1));
+    if (!sh) return;
     var card = sh.querySelector('.sheet-card'), last = null;
     function esc(e) { if (e.key === 'Escape') off(); }
     function off() { sh.hidden = true; document.body.classList.remove('sheet-open'); document.removeEventListener('keydown', esc); if (last) last.focus(); }
@@ -38,7 +38,7 @@
     pill.addEventListener('click', on);
     sh.querySelector('.sheet-back').addEventListener('click', off);
     sh.querySelector('.city-close').addEventListener('click', off);
-  })();
+  });
 
   // ?share renders the 1200x630 card for share.png (dark, map only; the build screenshots it headless).
   if (/[?&]share\b/.test(location.search)) { document.documentElement.dataset.theme = 'dark'; document.documentElement.dataset.share = '1'; }
