@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  try { var t = localStorage.getItem('here-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<title>Changelog — here.events</title>
+<meta name="description" content="What has changed on the here.events calendars: cities launched, venues and sources added, sites merged or retired, and how the listings are checked.">
+<link rel="canonical" href="https://here.events/changelog/">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .doc { width: min(40rem, 100% - 2.5rem); margin: 2.4rem auto 4rem; line-height: 1.6; }
+  .doc .back { font-family: var(--mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); text-decoration: none; }
+  .doc .back:hover { color: var(--gold); }
+  .doc h1 { font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1.05; margin: 1.2rem 0 .3rem; }
+  .doc .updated { margin: 0 0 2rem; color: var(--ink-soft); font-size: .9rem; }
+  .doc h2 { font-size: 1.1rem; margin: 2rem 0 .4rem; }
+  .doc p, .doc li { color: var(--ink); }
+  .doc ul { padding-left: 1.2rem; }
+  .doc a { color: var(--gold); }
+  .doc .log { list-style: none; padding: 0; margin: 0; }
+  .log li { display: grid; grid-template-columns: 4.2rem 1fr; gap: .9rem; padding: .55rem 0; border-top: 1px solid var(--line); }
+  .log time { font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); padding-top: .2rem; white-space: nowrap; }
+</style>
+</head>
+<body>
+<main class="doc">
+  <a class="back" href="../">here.events</a>
+  <h1>Changelog</h1>
+  <p class="updated">Last updated <time datetime="2026-11-15">November 15, 2026</time></p>
+
+  <p>What has changed on the here.events calendars: cities launched, venues and sources added, sites merged or retired, and how the listings are checked. The listings themselves are rebuilt every day; <a href="https://seattle.here.events/how.html">How It’s Made</a> explains how.</p>
+
+  <h2>November 2026</h2>
+  <ul class="log">
+    <li><time datetime="2026-11-15">Nov 15</time><span>Every calendar gets a How It’s Made page and shows the date of its last daily build. This changelog starts.</span></li>
+    <li><time datetime="2026-11-14">Nov 14</time><span>The here.events home page lists what is on, city by city, refreshed daily.</span></li>
+    <li><time datetime="2026-11-10">Nov 10</time><span>Seattle Seawolves: schedule and news are read from the club’s new site.</span></li>
+    <li><time datetime="2026-11-07">Nov 7</time><span>Venue link audit across 26 calendars: hijacked, dead and wrong venue links replaced. A link whose page has turned to spam is now blocked, and every venue link is re-audited monthly. Venues show their own mark in place of a ticket platform’s.</span></li>
+    <li><time datetime="2026-11-05">Nov 5</time><span>Add To My Calendar keeps the filter you had on. A venue renamed on Ticketmaster keeps its shows.</span></li>
+    <li><time datetime="2026-11-04">Nov 4</time><span>Venues added from their DICE pages: 38 in Miami, 18 in Chicago, 7 in Austin, 6 in Seattle, 5 in Las Vegas, 4 in San Diego.</span></li>
+    <li><time datetime="2026-11-03">Nov 3</time><span>Chop Shop (Chicago) and Sunset Tavern (Seattle) are read from their own DICE pages, with Ticketmaster behind.</span></li>
+    <li><time datetime="2026-11-02">Nov 2</time><span>The Burien calendar is retired.</span></li>
+  </ul>
+
+  <h2>October 2026</h2>
+  <ul class="log">
+    <li><time datetime="2026-10-31">Oct 31</time><span>Past events are kept for good, where they used to drop off after a year.</span></li>
+    <li><time datetime="2026-10-30">Oct 30</time><span><a href="https://tango.here.events/">Tango</a> launches: milongas, prácticas and festivals across the US and Canada. Festivals that span several venues are found weekly and grouped once we have looked at them.</span></li>
+    <li><time datetime="2026-10-29">Oct 29</time><span>About, FAQ and Sources pages on every calendar.</span></li>
+    <li><time datetime="2026-10-26">Oct 26</time><span>Kona and Hilo become one <a href="https://bigisland.here.events/">Big Island</a> calendar; the old addresses redirect to it.</span></li>
+    <li><time datetime="2026-10-25">Oct 25</time><span><a href="https://maui.here.events/">Maui</a> and the state-wide <a href="https://hawaii.here.events/">Hawaiʻi</a> calendar launch. The Map view arrives, first on the Seattle neighbourhoods.</span></li>
+    <li><time datetime="2026-10-24">Oct 24</time><span>Kona launches.</span></li>
+    <li><time datetime="2026-10-22">Oct 22</time><span><a href="https://curling.events/">curling.events</a> launches: bonspiels, championships and the Grand Slam.</span></li>
+    <li><time datetime="2026-10-21">Oct 21</time><span><a href="https://salem.here.events/">Salem</a> and <a href="https://bend.here.events/">Bend</a> launch.</span></li>
+    <li><time datetime="2026-10-20">Oct 20</time><span>Ticket links are tested on every build, so a listing leads to a real page.</span></li>
+    <li><time datetime="2026-10-17">Oct 17</time><span><a href="https://eugene.here.events/">Eugene</a> launches.</span></li>
+    <li><time datetime="2026-10-16">Oct 16</time><span><a href="https://seattle.here.events/">Seattle</a>, city-wide, and Burien launch.</span></li>
+    <li><time datetime="2026-10-15">Oct 15</time><span><a href="https://omaha.here.events/">Omaha</a> and <a href="https://lincoln.here.events/">Lincoln</a> replace the single Nebraska calendar. <a href="https://sanjuan.here.events/">San Juan</a>, <a href="https://anchorage.here.events/">Anchorage</a>, <a href="https://pioneersquare.seattle.here.events/">Pioneer Square</a> and <a href="https://denver.here.events/">Denver</a> launch.</span></li>
+    <li><time datetime="2026-10-14">Oct 14</time><span><a href="https://cancun.here.events/">Cancún</a> launches, the first calendar outside the United States.</span></li>
+    <li><time datetime="2026-10-13">Oct 13</time><span><a href="https://portangeles.here.events/">Port Angeles</a> launches; Field Arts &amp; Events Hall is read from its own calendar.</span></li>
+    <li><time datetime="2026-10-12">Oct 12</time><span><a href="https://miami.here.events/">Miami</a> and Nebraska launch.</span></li>
+    <li><time datetime="2026-10-11">Oct 11</time><span>here.events opens with its map and fifteen cities: Chicago, Portland, Madison, San Diego, Green Bay, La Crosse, Atlanta, Milwaukee, Pullman, Spokane, Forks, St. Louis, Austin, Honolulu and Las Vegas. Lower Queen Anne moves to <a href="https://lqa.seattle.here.events/">lqa.seattle.here.events</a>.</span></li>
+  </ul>
+
+  <h2>Tell us</h2>
+  <p>A wrong listing, a missing venue or a city you would like: <a href="mailto:hello@here.events">hello@here.events</a>.</p>
+</main>
+</body>
+</html>

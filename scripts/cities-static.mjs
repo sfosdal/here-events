@@ -7,7 +7,8 @@
 //   site/sitemap-index.xml — a sitemap index naming the map's sitemap and every
 //                            live city's, one submission in Search Console for all
 //                            (the Domain property sc-domain:here.events owns every host)
-//   site/sitemap.xml       — the map's own sitemap, lastmod = today (Google reads lastmod to decide recrawls)
+//   site/sitemap.xml       — the map's own sitemap: the home page, privacy/ and changelog/ (scripts/sitemaps.mjs;
+//                            digest.mjs rewrites both sitemaps daily, so lastmod stays the truth)
 //   site/robots.txt        — names both sitemaps
 //   site/<key>/index.html  — here.events/<key> redirects to the city's own host, site/404.html the rest
 // All from site/cities.json, the one place a city is added. Run after any change
@@ -15,6 +16,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeSitemaps } from './sitemaps.mjs';
 
 const site = join(dirname(fileURLToPath(import.meta.url)), '..', 'site');
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -39,12 +41,9 @@ const re = /(<div id="cityGroups" class="city-groups">)[\s\S]*?(<\/div>)/;
 if (!re.test(html)) throw new Error('index.html has no <div id="cityGroups">');
 writeFileSync(join(site, 'index.html'), html.replace(re, `$1\n${groups.join('\n')}\n    $2`));
 
-// the sitemap index: the map's own sitemap, then every live city's
+// the sitemap index (the map's own sitemap, then every live city's) and the map's own sitemap
 const live = cities.filter((c) => c.live);
-const today = new Date().toISOString().slice(0, 10);
-const maps = ['https://here.events/sitemap.xml'].concat(live.map((c) => `${url(c)}sitemap.xml`));
-writeFileSync(join(site, 'sitemap-index.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${maps.map((m) => `  <sitemap><loc>${m}</loc><lastmod>${today}</lastmod></sitemap>`).join('\n')}\n</sitemapindex>\n`);
-writeFileSync(join(site, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://here.events/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq></url>\n</urlset>\n`);
+const { maps: mapCount } = writeSitemaps(site, cities);
 writeFileSync(join(site, 'robots.txt'), 'User-agent: *\nAllow: /\n\nSitemap: https://here.events/sitemap.xml\nSitemap: https://here.events/sitemap-index.xml\n');
 // Short addresses (Steve, 2026-10-19: "I want here.events/<city> and
 // here.events/<neighborhood> to redirect to the fully qualified domain name"):
@@ -101,4 +100,4 @@ writeFileSync(join(site, '404.html'), `<!doctype html>
 <body><p>Nothing here. <a href="https://here.events/">Pick a city on the map</a>.</p></body>
 </html>
 `);
-console.log(`cities-static: ${cities.length} cities in the pop-up (${live.length} live), sitemap-index.xml ${maps.length} sitemaps, robots.txt, ${live.length} short-address redirects + 404.html`);
+console.log(`cities-static: ${cities.length} cities in the pop-up (${live.length} live), sitemap-index.xml ${mapCount} sitemaps, robots.txt, ${live.length} short-address redirects + 404.html`);

@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeSitemaps } from './sitemaps.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const site = join(root, 'site');
@@ -92,7 +93,7 @@ ${groups}
 ${ACTIVITIES.map((a) => card(a, a.url.replace(/^https:\/\/|\/$/g, ''))).join('\n')}
         </section>
     </div>
-    <p class="digest-links"><a href="https://seattle.here.events/about.html">About here.events</a> <a href="https://seattle.here.events/faq.html">FAQ</a> <a href="privacy/">Privacy</a> <a href="mailto:hello@here.events">Contact</a></p>
+    <p class="digest-links"><a href="https://seattle.here.events/about.html">About here.events</a> <a href="https://seattle.here.events/faq.html">FAQ</a> <a href="https://seattle.here.events/how.html">How It’s Made</a> <a href="changelog/">Changelog</a> <a href="privacy/">Privacy</a> <a href="mailto:hello@here.events">Contact</a></p>
   </div>
 </section>`;
 
@@ -101,6 +102,8 @@ const html = readFileSync(htmlPath, 'utf8');
 const re = /<section id="digest" class="digest"[\s\S]*?\n<\/section>/;
 if (!re.test(html)) throw new Error('index.html has no <section id="digest">');
 writeFileSync(htmlPath, html.replace(re, section));
+
+writeSitemaps(site, cities);
 
 const nextCache = Object.fromEntries(all.map((s) => { const { ok, keys, ...keep } = got[s.key]; return [s.key, keep]; }));
 writeFileSync(cachePath, JSON.stringify(nextCache, null, 1) + '\n');
