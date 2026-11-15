@@ -228,3 +228,25 @@ a.gw:hover .gw-credit strong { color: var(--ink-bright); }
 :root[data-share] .map { margin: 0; padding: 0 24px 0 0; display: block; width: auto; }
 :root[data-share] #usMap { height: auto; aspect-ratio: 1280 / 640; }
 :root[data-share] .pin .label, :root[data-share] .pin .leader { display: initial; }
+
+.digest { width: min(var(--pagew), 100% - 3rem); margin: 3rem auto 4rem; color: var(--ink); line-height: 1.5; }
+.digest-inner > h2 { margin: 0 0 .8rem; font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 5vw, 3rem); line-height: 1; text-transform: uppercase; color: var(--ink-bright); }
+.digest-lede { max-width: 46rem; margin: 0 0 .8rem; font-size: 1.02rem; }
+.digest-lede strong { color: var(--ink-bright); }
+.digest-groups { columns: 22rem; column-gap: 2.4rem; margin-top: 2rem; }
+.digest-group { break-inside: avoid; margin-bottom: 1.6rem; }
+.digest-group > h3 { margin: 0 0 .5rem; padding-bottom: .3rem; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .76rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.digest-site { break-inside: avoid; margin: 0 0 1.1rem; }
+.digest-site h4 { margin: 0; font-size: 1.05rem; display: flex; align-items: baseline; gap: .5rem; }
+.digest-site h4 a { color: var(--ink-bright); text-decoration: none; }
+.digest-site h4 a:hover { color: var(--gold); text-decoration: underline; }
+.digest-site h4 small { font-family: var(--mono); font-size: .68rem; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.digest-count, .digest-note { margin: .1rem 0 0; font-size: .86rem; color: var(--ink-soft); }
+.digest-site ul { margin: .35rem 0 0; padding: 0; list-style: none; font-size: .88rem; }
+.digest-site li { display: grid; grid-template-columns: 6.4rem 1fr; margin: .15rem 0; }
+.digest-site li time { padding-top: .12rem; font-family: var(--mono); font-size: .74rem; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
+.digest-site li span { color: var(--ink-soft); }
+.digest-links { display: flex; flex-wrap: wrap; gap: .4rem 1.6rem; margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); font-family: var(--mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; }
+.digest-links a { color: var(--ink-soft); text-decoration: none; }
+.digest-links a:hover { color: var(--gold); text-decoration: underline; }
+.digest-site li p { margin: 0; }

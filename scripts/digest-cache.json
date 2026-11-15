@@ -1,0 +1,717 @@
+{
+ "lqa": {
+  "upcoming": 1441,
+  "venues": 20,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Seattle Hmong New Year",
+    "venue": "Seattle Center"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "You Can See Everything",
+    "venue": "SIFF Cinema Uptown"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Eureka Day",
+    "venue": "Seattle Rep"
+   }
+  ]
+ },
+ "pioneersquare": {
+  "upcoming": 286,
+  "venues": 14,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Kindling: Bookbinding Workshop",
+    "venue": "Around Pioneer Square"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Waterfront Park Firepit Socials",
+    "venue": "Waterfront Park"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Dogstrum • Martyr Party • Hillside ’77",
+    "venue": "Central Saloon"
+   }
+  ]
+ },
+ "seattle": {
+  "upcoming": 2903,
+  "venues": 66,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Kindling: Bookbinding Workshop",
+    "venue": "Around Pioneer Square"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Seattle Hmong New Year",
+    "venue": "Seattle Center"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "SP 201: Poster Printing",
+    "venue": "The Vera Project"
+   }
+  ]
+ },
+ "everett": {
+  "upcoming": 1485,
+  "venues": 19,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Glass & Glow: Stained Glass Workshop",
+    "venue": "Schack Art Center"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Saturday D&D Group (Evergreen Branch)",
+    "venue": "Everett Public Library"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Skate America - Rhythm Dance and Women's Short Program",
+    "venue": "Angel of the Winds Arena"
+   }
+  ]
+ },
+ "forks": {
+  "upcoming": 4,
+  "venues": 1,
+  "next": [
+   {
+    "date": "2027-02-19",
+    "title": "The Simon & Garfunkel Story (Touring)",
+    "venue": "Skookum Creek Event Center"
+   }
+  ]
+ },
+ "portangeles": {
+  "upcoming": 39,
+  "venues": 1,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Battle of the Bands",
+    "venue": "Field Arts & Events Hall"
+   }
+  ]
+ },
+ "spokane": {
+  "upcoming": 210,
+  "venues": 11,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "The Music Man (Touring) - Age Recommendation: 6 and Over",
+    "venue": "First Interstate Center for the Arts"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Foy Vance World Tour | 2026 & 2027",
+    "venue": "Knitting Factory"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Three Days Grace - Alienation Tour ",
+    "venue": "Spokane Arena"
+   }
+  ]
+ },
+ "pullman": {
+  "upcoming": 32,
+  "venues": 6,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Washington State Cougars Basketball vs Northwest University Eagles",
+    "venue": "Beasley Coliseum"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Idaho Vandals Football vs. UC Davis Aggies Football",
+    "venue": "Kibbie Dome"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Washington State  Cougars Football vs. Colorado State University Rams Football",
+    "venue": "Martin Stadium"
+   }
+  ]
+ },
+ "eugene": {
+  "upcoming": 292,
+  "venues": 15,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Oregon Ducks Football vs. University of Michigan Wolverines Football",
+    "venue": "Autzen Stadium"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Rodgers & Hammerstein's The Sound of Music Sing-A-Long",
+    "venue": "Hult Center"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "UO Jazz Ensembles",
+    "venue": "Beall Concert Hall"
+   }
+  ]
+ },
+ "salem": {
+  "upcoming": 63,
+  "venues": 5,
+  "next": [
+   {
+    "date": "2026-11-18",
+    "title": "Straight No Chaser",
+    "venue": "Elsinore Theatre"
+   },
+   {
+    "date": "2026-11-20",
+    "title": "Charles Dickens Writes A Christmas Carol",
+    "venue": "Pentacle Theatre"
+   },
+   {
+    "date": "2026-11-20",
+    "title": "Disney Skate Night",
+    "venue": "The Madhouse"
+   }
+  ]
+ },
+ "bend": {
+  "upcoming": 106,
+  "venues": 7,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Emily Scott Robinson",
+    "venue": "Volcanic Theatre Pub"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Bend Comedy Festival Presents: Bo Johnson",
+    "venue": "Tower Theatre"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Goodnight, Texas",
+    "venue": "The Belfry"
+   }
+  ]
+ },
+ "portland": {
+  "upcoming": 822,
+  "venues": 20,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Leapin’ Louie: The Upside Down Ocean",
+    "venue": "Alberta Rose Theatre"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Earlybirds Club",
+    "venue": "Wonder Ballroom"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Leanna Firestone",
+    "venue": "Hawthorne Theatre"
+   }
+  ]
+ },
+ "sandiego": {
+  "upcoming": 1206,
+  "venues": 27,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Bluey's Big Play",
+    "venue": "Balboa Theatre"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "How the Grinch Stole Christmas (Touring)",
+    "venue": "The Old Globe"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Robin Henkel",
+    "venue": "Humphreys Backstage Live"
+   }
+  ]
+ },
+ "lasvegas": {
+  "upcoming": 1039,
+  "venues": 33,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "The Book of Mormon (Touring)",
+    "venue": "The Venetian Theatre"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Chase Petra",
+    "venue": "Grey Witch"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Henderson Silver Knights vs. Calgary Wranglers",
+    "venue": "Lee's Family Forum"
+   }
+  ]
+ },
+ "denver": {
+  "upcoming": 1297,
+  "venues": 31,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Disney On Ice presents Find Your Hero",
+    "venue": "Ball Arena"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Warren Miller's Days Off - Day 3 Afternoon",
+    "venue": "Boulder Theater"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Fortune Feimster: Takin' Care of Biscuits Live Special Taping",
+    "venue": "Paramount Theatre"
+   }
+  ]
+ },
+ "bigisland": {
+  "upcoming": 235,
+  "venues": 17,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "100% Pure Kona Coffee Half Marathon — Coconut Grove Marketplace",
+    "venue": "Kona Coffee Cultural Festival"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "ʻUkulele Concert and Kanikapila",
+    "venue": "Hawaiʻi Volcanoes National Park"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Jam Without a Plan with Brittni Paiva",
+    "venue": "Kahilu Theatre"
+   }
+  ]
+ },
+ "hawaii": {
+  "upcoming": 751,
+  "venues": 50,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "100% Pure Kona Coffee Half Marathon — Coconut Grove Marketplace",
+    "venue": "Kona Coffee Cultural Festival"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Create ʻAPUtunity Experience",
+    "venue": "Bishop Museum"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "ʻUkulele Concert and Kanikapila",
+    "venue": "Hawaiʻi Volcanoes National Park"
+   }
+  ]
+ },
+ "honolulu": {
+  "upcoming": 366,
+  "venues": 21,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Create ʻAPUtunity Experience",
+    "venue": "Bishop Museum"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "It’s Giving…Market by Honolulu Maker’s Market",
+    "venue": "SALT at Our Kakaʻako"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Hawaii Market Expo",
+    "venue": "Blaisdell Exhibition Hall"
+   }
+  ]
+ },
+ "austin": {
+  "upcoming": 675,
+  "venues": 25,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Aftershock Sat: Max Styler + SG Lewis",
+    "venue": "The Concourse Project"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Austin Spurs vs Memphis Hustle",
+    "venue": "H-E-B Center"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Clara La San - Chosen Silences Tour Fall 2026",
+    "venue": "Emo's"
+   }
+  ]
+ },
+ "stlouis": {
+  "upcoming": 580,
+  "venues": 19,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Saint Louis Billiken Mens Basketball vs. High Point Men's Basketball",
+    "venue": "Chaifetz Arena"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Flying House",
+    "venue": "Blueberry Hill Duck Room"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Sam Grisman Project",
+    "venue": "The Sheldon"
+   }
+  ]
+ },
+ "chicago": {
+  "upcoming": 1790,
+  "venues": 48,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Jersey Boys (Chicago)",
+    "venue": "CIBC Theatre"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "TravisMathew Legends Classic presented by Old Trapper",
+    "venue": "United Center"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "A Midsummer Night's Dream",
+    "venue": "Chicago Shakespeare"
+   }
+  ]
+ },
+ "milwaukee": {
+  "upcoming": 772,
+  "venues": 19,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Wild Kratts Live! 2.0",
+    "venue": "Miller High Life Theatre"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Lightris / Sero / ¡un1c0rnz1nth3grayv! & mycatatetfoutayobrainz Split Set / Foenem / Bullshit Nonsense / Left For Dead / Mochi Voodoo",
+    "venue": "X-Ray Arcade"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "LUCY (Cooper B. Handy) • Gods Wisdom • Creature Weather",
+    "venue": "Cactus Club"
+   }
+  ]
+ },
+ "madison": {
+  "upcoming": 261,
+  "venues": 11,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Wisconsin Badgers Mens Basketball vs. Coastal Carolina Chanticleers Mens Basketball",
+    "venue": "Kohl Center"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Victor Wooten & The Wooten Brothers",
+    "venue": "Majestic Theatre"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "almost monday",
+    "venue": "High Noon Saloon"
+   }
+  ]
+ },
+ "lacrosse": {
+  "upcoming": 48,
+  "venues": 4,
+  "next": [
+   {
+    "date": "2026-11-18",
+    "title": "Cirque Musica Holiday Wonderland",
+    "venue": "Mayo Civic Center"
+   },
+   {
+    "date": "2026-11-20",
+    "title": "Roots and Boots - 90's Electric Throwdown",
+    "venue": "Treasure Island Resort & Casino"
+   },
+   {
+    "date": "2026-12-03",
+    "title": "NUTCRACKER! Magical Christmas Ballet",
+    "venue": "RCU Theatre"
+   }
+  ]
+ },
+ "greenbay": {
+  "upcoming": 236,
+  "venues": 6,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Bart Starr Plaza Tailgate Party",
+    "venue": "Resch Center"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Green Bay Packers vs. Minnesota Vikings",
+    "venue": "Lambeau Field"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "360 ALLSTARS Urban Circus",
+    "venue": "Fox Cities P.A.C."
+   }
+  ]
+ },
+ "atlanta": {
+  "upcoming": 1234,
+  "venues": 27,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Atlanta Falcons v Kansas City Chiefs",
+    "venue": "Mercedes-Benz Stadium"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Fauré's Requiem with ASO",
+    "venue": "Atlanta Symphony Hall"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Atlanta Opera Presents Silent Night",
+    "venue": "Cobb Energy Centre"
+   }
+  ]
+ },
+ "miami": {
+  "upcoming": 1111,
+  "venues": 44,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Choque de Gigantes: Tiburones vs Magallanes",
+    "venue": "loanDepot park"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Hamilton (Touring)",
+    "venue": "Broward Center"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Club 1BD Miami ft. Chvmeleon, Hunny Bee, Pressure Point, & Spinelli",
+    "venue": "ZeyZey"
+   }
+  ]
+ },
+ "cancun": {
+  "upcoming": 38,
+  "venues": 6,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Conversando con el Diablo",
+    "venue": "Teatro de la Ciudad, Playa del Carmen"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "\"Aluxe Fest 2026\" Festival de Música",
+    "venue": "Elsewhere in Cancún"
+   },
+   {
+    "date": "2026-11-18",
+    "title": "Una Noche De-Mente - Cancún - 18 de noviembre",
+    "venue": "Teatro de Cancún"
+   }
+  ]
+ },
+ "omaha": {
+  "upcoming": 311,
+  "venues": 9,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Omaha Holiday Boutique 2026",
+    "venue": "CHI Health Center Omaha"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Black Violin",
+    "venue": "Holland Performing Arts Center"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Cheap Trick: All Washed Up Tour",
+    "venue": "The Astro Theater"
+   }
+  ]
+ },
+ "lincoln": {
+  "upcoming": 123,
+  "venues": 7,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Hot Wheels Monster Trucks Live Glow-N-Fire",
+    "venue": "Pinnacle Bank Arena"
+   },
+   {
+    "date": "2026-11-17",
+    "title": "Nebraska Cornhuskers Womens Volleyball vs. Minnesota Gophers Womens Volleyball",
+    "venue": "Bob Devaney Sports Center"
+   },
+   {
+    "date": "2026-11-18",
+    "title": "A Killer's Confession, Dizasterpiece, Dead Things, Sister Scarlet, Bleeding Horizon",
+    "venue": "Bourbon Theatre"
+   }
+  ]
+ },
+ "sanjuan": {
+  "upcoming": 147,
+  "venues": 9,
+  "next": [
+   {
+    "date": "2026-11-15",
+    "title": "Christmas Bazaar",
+    "venue": "Vivo Beach Club"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Luis Perico Ortiz Te Llegó la Trulla",
+    "venue": "Moneró Café Teatro"
+   },
+   {
+    "date": "2026-11-15",
+    "title": "Cangrejeros de Santurce vs Criollos de Caguas",
+    "venue": "Estadio Hiram Bithorn"
+   }
+  ]
+ },
+ "anchorage": {
+  "upcoming": 99,
+  "venues": 8,
+  "next": [
+   {
+    "date": "2026-11-19",
+    "title": "Parlor In The Round",
+    "venue": "Bear Tooth Theatrepub"
+   },
+   {
+    "date": "2026-11-19",
+    "title": "Anchorage Wolverines vs Springfield Jr. Blues",
+    "venue": "Sullivan Arena"
+   },
+   {
+    "date": "2026-11-19",
+    "title": "Thursday Night Fights:Boxing",
+    "venue": "Egan Center"
+   }
+  ]
+ },
+ "maui": {
+  "upcoming": 150,
+  "venues": 12,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Maui OnStage Education & Youth Program presents “The Enchanted Bookshop”",
+    "venue": "ProArts Playhouse"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Lahaina Hula Show",
+    "venue": "Lahaina Cannery Mall"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "46th Annual HAWAIʻI International Film Festival (Hiff)",
+    "venue": "Maui Arts & Cultural Center"
+   }
+  ]
+ },
+ "tango": {
+  "upcoming": 1243,
+  "venues": 8,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Mariela's Practica",
+    "venue": "New York, NY"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Milonga - Tangueria",
+    "venue": "Montréal, QC"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Tango, Beginner Level with Monica Caivano & Gustavo Simplis at Esquina Tango",
+    "venue": "Austin, TX"
+   }
+  ]
+ },
+ "curling": {
+  "upcoming": 1497,
+  "venues": 12,
+  "next": [
+   {
+    "date": "2026-11-14",
+    "title": "Fall Saturday Morning Doubles",
+    "venue": "Racine, WI"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Learn to Curl 2",
+    "venue": "McKees Rocks, PA"
+   },
+   {
+    "date": "2026-11-14",
+    "title": "Individual Try Curling Event",
+    "venue": "Seattle, WA"
+   }
+  ]
+ }
+}
